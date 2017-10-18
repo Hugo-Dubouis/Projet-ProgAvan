@@ -1,9 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\lib\\x64",
+    "\\include",
     "\\src"
   ],
-  "SelectedNode": "\\src\\niv5.txt",
+  "SelectedNode": "\\src",
   "PreviewInSolutionExplorer": false
 }
