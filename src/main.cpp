@@ -10,29 +10,32 @@ int main(int argc, char **argv) {
 	fenetre = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
 
 	// Programme principal du jeu
-	
-	// On ouvre le fichier nivx.txt
-	FILE* ptrFichier = fopen(const char* "niv1.txt", const char* "r");
 
+	// On ouvre le fichier nivx.txt
+	FILE* ptrFichier = fopen("niv1.txt", "r");
+
+	// Menu (à voir à la fin)
+	
 	// Pour chaque ligne du fichier texte créer un tableau
-	int taille, taille1, taille2, i;
+	int tab;
+	int height, width;
 	
-	float* table1D = malloc(taille * sizeof(float*));
-	
-	float** table2D = malloc(taille1 * sizeof(float*))
+	// Dimension 1
+	float* table1D = (float*) malloc(width * sizeof(float*));
+
+	// Dimension 2
+	float** table2D;
+	table2D = (float**)malloc(width * sizeof(float*));
+	for (int i = 0;i < width; i++) {
+		table2D[i] = (float*)malloc(height*sizeof(float));
+	}
+
 
 	if (ptrFichier == NULL) {
 		exit(EXIT_FAILURE);
 	}
-	for (i = 0; i < taille1;) 
-		table2D[i] = malloc(taille2 * sizeof(float));
 
-
-
-		// 
-
-		int fclose(FILE* ptrFichier)
-	}
+	int fclose(FILE* ptrFichier);
 
 	// Tempo
 	SDL_Delay(3000);
