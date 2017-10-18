@@ -1,9 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\include",
     "\\src"
   ],
-  "SelectedNode": "\\src\\niv6.txt",
+  "SelectedNode": "\\src\\makefile",
   "PreviewInSolutionExplorer": false
 }
