@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Attribution des valeurs dans le tableau en 2D
+	
 	int car_actuel;
 
 	for (int i = 0; i < width; i++) {
