@@ -6,7 +6,7 @@
 
 // Dimmensions de la map
 const int width = 20;
-const int height = 20;
+const int height = 21;
 int dim_allocated = 0;
 
 int main(int argc, char **argv) {
@@ -39,11 +39,15 @@ int main(int argc, char **argv) {
 	}
 
 	// Attribution des valeurs dans le tableau en 2D
+	int car_actuel;
 
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
-			table2D[i][j] = fgetc(fmap);
-			std::cout << table2D[i][j];
+			car_actuel = fgetc(fmap);
+			if(car_actuel != 10 && car_actuel != -1) {
+				table2D[i][j] = car_actuel;
+				std::cout << table2D[i][j];
+			}
 		}
 	}
 
