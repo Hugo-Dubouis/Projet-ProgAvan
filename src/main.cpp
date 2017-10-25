@@ -4,11 +4,16 @@
 #include <iostream>
 #include <fstream>
 
+// Dimmensions de la map
+const int width = 20;
+const int height = 20;
+int dim_allocated = 0;
+
 int main(int argc, char **argv) {
 	// Initialisation de la SDL
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	// Fenetre du jeu
-	SDL_Window * fenetre = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
+	SDL_Window * fenetre = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 600, SDL_WINDOW_SHOWN);
 
 	// Creation du renderer
 	SDL_Renderer * renderer = SDL_CreateRenderer(fenetre, -1, 0);
@@ -21,82 +26,33 @@ int main(int argc, char **argv) {
 	SDL_Surface * image2 = SDL_LoadBMP("textures/wall.bmp");
 	SDL_Texture * wall = SDL_CreateTextureFromSurface(renderer, image2);
 
-	// Menu (à voir à la fin)
-	
+	// Ouverture du fichier de la map
+	FILE *fmap;
+	fmap = fopen("niv1.txt", "r");
 
-	// Pour chaque ligne du fichier texte créer un tableau
-	/* int tab;
-	int height = 20;
-	int width = 20; 
-
-	// Dimension 2
+	// Initialisation du tableau en 2D
 	float** table2D;
 	table2D = (float**)malloc(width * sizeof(float*));
-	for (int i = 0;i < width; i++) {
-		table2D[i] = (float*)malloc(height * sizeof(float));
+
+	for (int dim_allocated = 0;dim_allocated < width; dim_allocated++) {
+		table2D[dim_allocated] = (float*)malloc(height * sizeof(float));
 	}
-	*/
 
-	//Map
+	// Attribution des valeurs dans le tableau en 2D
 
-
-	// Initialisation de la map (Tableau 20x20)
-	char map[20][20];
-	// Image de fond
-
-	// Texture des murs
-
-	// Ouverture du fichier Map
-	std::ifstream MapFile("niv1.txt");
-
-	// Ouverture de la map avec succes
-	if (MapFile)
-	{
-		for (int height = 0; height < 21; ++height)
-		{
-			// On lis le contenu de chaque ligne de longueur 20q
-			MapFile.read(map[height], 21);
-
-
-			// Création du background
-			SDL_RenderCopy(renderer, background, NULL, NULL);
-		
-			// Affichage du contenu du tableau dans la console
-
-			for (int width = 0; width < 21; ++width)
-			{
-				std::cout << map[height][width];
-				// Code pour afficher des murs aux coordonées du tableau contenant des 1
-				if (map[height][width] == 1) {
-					SDL_Rect position;
-					position.x = width;
-					position.y = height;
-					SDL_RenderCopy(renderer, wall, NULL, &position);
-				}
-				SDL_RenderPresent(renderer);
-			}
-			
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+			table2D[i][j] = fgetc(fmap);
+			std::cout << table2D[i][j];
 		}
 	}
 
+	// Exécution du renderer
+	SDL_RenderCopy(renderer, background, NULL, NULL);
+	SDL_RenderPresent(renderer);
 
 
-	MapFile.close();
-
-	/*
-	// Boucle pour lire contenu table 2D
-	for (int i = 0; i < width; i++)
-		for (int j = 0; j < height; j++)
-			std::cout << table2D[i][j] << "\n";
-
-	free(table2D);
-	*/
-/* Si fichier niveau vide
-	if (ptrFichier == NULL) {
-		exit(EXIT_FAILURE);
-	}
-	*/
-	int fclose(FILE* ptrFichier);
+	/*free(table2D); */
 
 	// Tempo
 	SDL_Delay(3000);
