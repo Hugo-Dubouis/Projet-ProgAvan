@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1509047784 source:d:\users\damien\documents\projet-progavan\main.cpp
+	<SDL2/SDL.h>
+	<stdio.h>
+	<stdlib.h>
+	<iostream>
+	<fstream>
+
