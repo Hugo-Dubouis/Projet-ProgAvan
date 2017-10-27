@@ -54,6 +54,9 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 
+    // Gestion des évènements
+    SDL_Event esc;
+
 	// Gestion des textures
 	SDL_Surface* tileset = SDL_LoadBMP("textures/wall.bmp");
 	if (!tileset) // En cas d'erreur
@@ -97,7 +100,6 @@ int main(int argc, char **argv) {
 	int car_actuel;
 	int i, j;
 
-
 	for (int i = 0; i < map_width; i++) {
 		for (int j = 0; j < map_height; j++) {
 			car_actuel = fgetc(fmap);
@@ -110,18 +112,33 @@ int main(int argc, char **argv) {
 
 	Afficher(screen, texture_wall, table2D, map_width, map_height, renderer);
 
+    // Liberation de mémoire
+    free(table2D);
 	SDL_FreeSurface(tileset);
 	SDL_FreeSurface(screen);
+
+	// Lancement du rendu
 	SDL_RenderPresent(renderer);
 
+	// Appuyer sur echap pour quitter
+	int quit;
+    while (quit)
+    {
+        SDL_WaitEvent(&esc);
+        switch(esc.type)
+        {
+            case SDL_KEYDOWN:
+                switch(esc.key.keysym.sym)
+                {
+                    case SDLK_ESCAPE:
+                        SDL_Quit();
+                        return 0;
+                        break;
+                }
+                break;
+        }
+    }
 
-	/*free(table2D); */
 
-	// Tempo
-	SDL_Delay(30000);
-	// Destruction de la fenêtre
-	SDL_DestroyWindow(fenetre);
-	// On quitte la SDL
-	SDL_Quit();
-	return 0;
+
 }
