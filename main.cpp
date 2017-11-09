@@ -15,7 +15,7 @@ const int tile_height = 30;
 
 // Fonction afficher
 
-void Afficher(SDL_Surface* screen, SDL_Texture* wall, float** table, int map_width, int map_height, SDL_Renderer * sdlRenderer)
+void DrawMap(SDL_Surface* screen, SDL_Texture* wall, float** table, int map_width, int map_height, SDL_Renderer * sdlRenderer)
 {
 	int i, j;
 	SDL_Rect Rect_source;
@@ -41,27 +41,36 @@ void Afficher(SDL_Surface* screen, SDL_Texture* wall, float** table, int map_wid
 }
 
 int main(int argc, char **argv) {
-	// Initialisation de la SDL
-	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-	// Fenetre du jeu
-	SDL_Window * fenetre = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 600, SDL_WINDOW_SHOWN);
+	// Setup SDL2
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0){
+		std::cout << "Error while initializing SDL" << std::endl;
+		return 1;
+	}
+
+	// Setup window
+	SDL_Window * window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 600, SDL_WINDOW_SHOWN);
+	if (window == nullptr){
+		SDL_Quit();
+		std::cout << "Error while loading window" << std::endl;
+		return 1;
+	}
 
 	// Creation du renderer
-	SDL_Renderer * renderer = SDL_CreateRenderer(fenetre, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (renderer == NULL) // En cas d'erreur
 	{
-		printf("Erreur lors de la creation d'un renderer : %s", SDL_GetError());
+		printf("Erreur while creating renderer : %s", SDL_GetError());
 		return EXIT_FAILURE;
 	}
 
     // Gestion des évènements
-    SDL_Event esc;
+    SDL_Event event;
 
 	// Gestion des textures
 	SDL_Surface* tileset = SDL_LoadBMP("textures/wall.bmp");
 	if (!tileset) // En cas d'erreur
 	{
-		printf("Echec de chargement wall.bmp\n");
+		printf("Loading failed : wall.bmp\n");
 		SDL_Quit();
 		system("pause");
 		exit(-1);
@@ -69,14 +78,29 @@ int main(int argc, char **argv) {
 	SDL_Surface* screen = SDL_LoadBMP("textures/bg.bmp");
 	if (!screen) // En cas d'erreur
 	{
-		printf("Echec de chargement bg.bmp\n");
+		printf("Loading failed : bg.bmp\n");
+		SDL_Quit();
+		system("pause");
+		exit(-1);
+	}
+	SDL_Surface* player = SDL_LoadBMP("textures/snake.bmp");
+	if (!player) // En cas d'erreur
+	{
+		printf("Loading failed : snake.bmp\n");
 		SDL_Quit();
 		system("pause");
 		exit(-1);
 	}
 
+	// Creation des textures sur la surface
 	SDL_Texture* texture_wall = SDL_CreateTextureFromSurface(renderer, tileset);
 	SDL_Texture * background = SDL_CreateTextureFromSurface(renderer, screen);
+    SDL_Texture * snake = SDL_CreateTextureFromSurface(renderer, player);
+
+    SDL_FreeSurface(tileset);
+    SDL_FreeSurface(screen);
+    SDL_FreeSurface(player);
+
 
 	SDL_RenderCopy(renderer, background, NULL, NULL);
 
@@ -110,33 +134,43 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	Afficher(screen, texture_wall, table2D, map_width, map_height, renderer);
+	DrawMap(screen, texture_wall, table2D, map_width, map_height, renderer);
+    SDL_RenderPresent(renderer);
+
+	// Personnage
+	int x = 30;
+	int y = 30;
+
+
 
     // Liberation de mémoire
     free(table2D);
-	SDL_FreeSurface(tileset);
-	SDL_FreeSurface(screen);
 
 	// Lancement du rendu
-	SDL_RenderPresent(renderer);
+
 
 	// Appuyer sur echap pour quitter
-	int quit;
-    while (quit)
+	int quit = 0;
+    while (!quit)
     {
-        SDL_WaitEvent(&esc);
-        switch(esc.type)
+        SDL_WaitEvent(&event);
+        switch(event.type)
         {
             case SDL_KEYDOWN:
-                switch(esc.key.keysym.sym)
+                switch(event.key.keysym.sym)
                 {
-                    case SDLK_ESCAPE:
-                        SDL_Quit();
-                        return 0;
-                        break;
+                    case SDLK_ESCAPE: SDL_Quit(); return 0; break;
+                    case SDLK_LEFT:  x = x-30; break;
+                    case SDLK_RIGHT: x = x+30; break;
+                    case SDLK_UP:    y = y-30; break;
+                    case SDLK_DOWN:  y = y+30; break;
                 }
                 break;
+
         }
+        SDL_Rect dstrect = { x, y, 30, 30};
+        SDL_RenderCopy(renderer, snake, NULL, &dstrect);
+        SDL_RenderPresent(renderer);
     }
 
 
