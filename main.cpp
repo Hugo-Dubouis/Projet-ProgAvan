@@ -1,44 +1,25 @@
 #include <SDL2/SDL.h>
+#include "game.hpp"
+#include "snake.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
 
-// Dimmensions de la map
-const int map_width = 20; // Largeur
-const int map_height = 21; // Hauteur
+///////////////////////////////////////////////////////
+// Map settings
+
+// Map width and height
+int map_width = 20; // width
+int map_height = 21; // height
 int dim_allocated = 0;
 
-// Dimmensions des blocs
+// Blocs dimensions
 const int tile_width = 30;
 const int tile_height = 30;
 
-// Fonction afficher
-
-void DrawMap(SDL_Surface* screen, SDL_Texture* wall, float** table, int map_width, int map_height, SDL_Renderer * sdlRenderer)
-{
-	int i, j;
-	SDL_Rect Rect_source;
-	SDL_Rect Rect_dest;
-	Rect_source.x = 0;
-	Rect_source.y = 0;
-	Rect_source.w = 30;
-	Rect_source.h = 30;
-	Rect_dest.w = tile_width;
-	Rect_dest.h = tile_height;
-
-	for (int i = 0; i < map_width; i++) {
-		for (int j = 0; j < map_height; j++) {
-			if (table[i][j] == 49) {
-				Rect_dest.x = i*tile_width;
-				Rect_dest.y = j*tile_height;
-				SDL_RenderCopy(sdlRenderer, wall, &Rect_source, &Rect_dest);
-			}
-		}
-
-	}
-
-}
+///////////////////////////////////////////////////////
+// Main program
 
 int main(int argc, char **argv) {
 	// Setup SDL2
@@ -55,20 +36,20 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	// Creation du renderer
+	// Setup renderer
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (renderer == NULL) // En cas d'erreur
+	if (renderer == NULL)
 	{
-		printf("Erreur while creating renderer : %s", SDL_GetError());
+		printf("Error while creating renderer : %s", SDL_GetError());
 		return EXIT_FAILURE;
 	}
 
-    // Gestion des évènements
+    // Setup events
     SDL_Event event;
 
-	// Gestion des textures
+	// Textures
 	SDL_Surface* tileset = SDL_LoadBMP("textures/wall.bmp");
-	if (!tileset) // En cas d'erreur
+	if (!tileset) // Error
 	{
 		printf("Loading failed : wall.bmp\n");
 		SDL_Quit();
@@ -76,42 +57,40 @@ int main(int argc, char **argv) {
 		exit(-1);
 	}
 	SDL_Surface* screen = SDL_LoadBMP("textures/bg.bmp");
-	if (!screen) // En cas d'erreur
+	if (!screen) // Error
 	{
 		printf("Loading failed : bg.bmp\n");
 		SDL_Quit();
 		system("pause");
 		exit(-1);
 	}
+
 	SDL_Surface* player = SDL_LoadBMP("textures/snake.bmp");
-	if (!player) // En cas d'erreur
+	if (!player) // Error
 	{
 		printf("Loading failed : snake.bmp\n");
 		SDL_Quit();
 		system("pause");
 		exit(-1);
 	}
+	SDL_SetColorKey(player,SDL_TRUE,SDL_MapRGB(player->format, 238, 0, 255));
 
-	// Creation des textures sur la surface
+	// Creating texture from surface
 	SDL_Texture* texture_wall = SDL_CreateTextureFromSurface(renderer, tileset);
 	SDL_Texture * background = SDL_CreateTextureFromSurface(renderer, screen);
-    SDL_Texture * snake = SDL_CreateTextureFromSurface(renderer, player);
+    SDL_Texture * snake_texture = SDL_CreateTextureFromSurface(renderer, player);
 
     SDL_FreeSurface(tileset);
     SDL_FreeSurface(screen);
     SDL_FreeSurface(player);
 
-
 	SDL_RenderCopy(renderer, background, NULL, NULL);
 
-
-
-
-	// Ouverture du fichier de la map
+	// Opening map file
 	FILE *fmap;
 	fmap = fopen("levels/niv2.txt", "r");
 
-	// Initialisation du tableau en 2D
+	// Initializing 2D table
 	float** table2D;
 	table2D = (float**)malloc(map_width * sizeof(float*));
 
@@ -119,7 +98,7 @@ int main(int argc, char **argv) {
 		table2D[dim_allocated] = (float*)malloc(map_height * sizeof(float));
 	}
 
-	// Attribution des valeurs dans le tableau en 2D
+	// Attributing 2D table values from map file
 
 	int car_actuel;
 	int i, j;
@@ -134,45 +113,88 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	DrawMap(screen, texture_wall, table2D, map_width, map_height, renderer);
+	DrawMap(screen, texture_wall, table2D, map_width, map_height, tile_width, tile_height, renderer);
     SDL_RenderPresent(renderer);
 
-	// Personnage
-	int x = 30;
-	int y = 30;
+	// Snake spawn position
+	Snake snake;
+	snake.position.x = 1;
+	snake.position.y = 1;
 
-
-
-    // Liberation de mémoire
-    free(table2D);
-
-	// Lancement du rendu
-
-
-	// Appuyer sur echap pour quitter
+	// Snake head sprite clip
+	SDL_Rect snake_head_clip;
+    snake_head_clip ={90, 30, 30, 30};
+	// Events
 	int quit = 0;
     while (!quit)
     {
         SDL_WaitEvent(&event);
+        // Variables used for collisions detection
+        i = snake.position.x;
+        j = snake.position.y;
+
+        // Removing snake textures
+        SDL_Rect grass_rect_src = { 0, 0, 30, 30};
+        SDL_Rect grass_rect_dest = { snake.position.x*30, snake.position.y*30, 30, 30};
+
+        SDL_RenderCopy(renderer, background, &grass_rect_src, &grass_rect_dest);
         switch(event.type)
         {
             case SDL_KEYDOWN:
                 switch(event.key.keysym.sym)
                 {
                     case SDLK_ESCAPE: SDL_Quit(); return 0; break;
-                    case SDLK_LEFT:  x = x-30; break;
-                    case SDLK_RIGHT: x = x+30; break;
-                    case SDLK_UP:    y = y-30; break;
-                    case SDLK_DOWN:  y = y+30; break;
+                      case SDLK_UP:
+                        if (table2D[i][--j] == 49) { // Collision
+                            break;
+                        }
+                        else {
+                            snake.position.y = --snake.position.y;
+                            snake.direction = 1;
+                            snake_head_clip = {90, 0, 30, 30};
+                            break;
+                        };
+                    case SDLK_LEFT:
+                         if (table2D[--i][j] == 49) {
+                            break;
+                        }
+                        else {
+                            snake.position.x = --snake.position.x;
+                            snake.direction = 2;
+                            snake_head_clip = {90, 90, 30, 30};
+                            break;
+                        };
+                    case SDLK_RIGHT:
+                        if (table2D[++i][j] == 49) {
+                            break;
+                        }
+                        else {
+                            snake.position.x = ++snake.position.x;
+                            snake.direction = 3;
+                            snake_head_clip = {90, 30, 30, 30};
+                            break;
+                        };
+                    case SDLK_DOWN:
+                        if (table2D[i][++j] == 49) {
+                            break;
+                        }
+                        else {
+                            snake.position.y = ++snake.position.y;
+                            snake.direction = 4;
+                            snake_head_clip = {90, 60, 30, 30};
+                            break;
+                        };
+
                 }
                 break;
 
         }
-        SDL_Rect dstrect = { x, y, 30, 30};
-        SDL_RenderCopy(renderer, snake, NULL, &dstrect);
+        SDL_Rect snake_rect_dest = { snake.position.x*30, snake.position.y*30, 30, 30};
+        SDL_RenderCopy(renderer, snake_texture, &snake_head_clip, &snake_rect_dest);
         SDL_RenderPresent(renderer);
     }
 
-
+    // Free memory
+    free(table2D);
 
 }

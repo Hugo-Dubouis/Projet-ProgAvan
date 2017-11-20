@@ -3,8 +3,14 @@
 ///////////////////////////////////////////////////////
 // Structure describing Snake
 
+struct Position {
+    int x;
+    int y;
+};
+
+typedef struct Snake Snake; // Avoid to write "struct Snake" for each new alias of the structure
 struct Snake {
-    struct position; // Position is coordinates from x,y axis
+    struct Position position; // Position is coordinates from x,y axis
     int direction;
     // Direction where the snake is moving
     // 1 : UP
@@ -15,7 +21,4 @@ struct Snake {
     int score;
 };
 
-struct Position {
-    int x;
-    int y;
-};
+void snake_clip(int direction);

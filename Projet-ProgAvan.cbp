@@ -38,7 +38,11 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="game.cpp" />
+		<Unit filename="game.hpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="snake.cpp" />
+		<Unit filename="snake.hpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

@@ -1,3 +1,4 @@
 bin/
 obj/
 snake.exe
+*.o
