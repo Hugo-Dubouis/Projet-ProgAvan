@@ -75,14 +75,26 @@ int main(int argc, char **argv) {
 	}
 	SDL_SetColorKey(player,SDL_TRUE,SDL_MapRGB(player->format, 238, 0, 255));
 
+    SDL_Surface* apple_surface = SDL_LoadBMP("textures/apple.bmp");
+	if (!apple_surface) // Error
+	{
+		printf("Loading failed : apple.bmp\n");
+		SDL_Quit();
+		system("pause");
+		exit(-1);
+	}
+	SDL_SetColorKey(apple_surface,SDL_TRUE,SDL_MapRGB(apple_surface->format, 238, 0, 255));
+
 	// Creating texture from surface
 	SDL_Texture* texture_wall = SDL_CreateTextureFromSurface(renderer, tileset);
 	SDL_Texture * background = SDL_CreateTextureFromSurface(renderer, screen);
     SDL_Texture * snake_texture = SDL_CreateTextureFromSurface(renderer, player);
+    SDL_Texture * apple_texture = SDL_CreateTextureFromSurface(renderer, apple_surface);
 
     SDL_FreeSurface(tileset);
     SDL_FreeSurface(screen);
     SDL_FreeSurface(player);
+    SDL_FreeSurface(apple_surface);
 
 	SDL_RenderCopy(renderer, background, NULL, NULL);
 
@@ -108,12 +120,16 @@ int main(int argc, char **argv) {
 			car_actuel = fgetc(fmap);
 			if(car_actuel != 10 && car_actuel != -1) {
 				table2D[i][j] = car_actuel;
-				std::cout << table2D[i][j];
 			}
 		}
 	}
 
 	DrawMap(screen, texture_wall, table2D, map_width, map_height, tile_width, tile_height, renderer);
+	DrawFruits(apple_texture, table2D, map_width, map_height,tile_width,tile_height,renderer);
+
+
+
+
     SDL_RenderPresent(renderer);
 
 	// Snake spawn position
