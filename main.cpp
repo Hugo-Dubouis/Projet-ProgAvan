@@ -124,9 +124,17 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	DrawMap(screen, texture_wall, table2D, map_width, map_height, tile_width, tile_height, renderer);
-	DrawFruits(apple_texture, table2D, map_width, map_height,tile_width,tile_height,renderer);
+	Apple apple;
 
+	DrawMap(screen,texture_wall, table2D, map_width, map_height, tile_width, tile_height, renderer);
+	DrawFruits(&apple,
+            apple_texture,
+            table2D,
+            map_width,
+            map_height,
+            tile_width,
+            tile_height,
+            renderer);
 
 
 
@@ -136,6 +144,7 @@ int main(int argc, char **argv) {
 	Snake snake;
 	snake.position.x = 1;
 	snake.position.y = 1;
+
 
 	// Snake head sprite clip
 	SDL_Rect snake_head_clip;
@@ -148,6 +157,11 @@ int main(int argc, char **argv) {
         // Variables used for collisions detection
         i = snake.position.x;
         j = snake.position.y;
+
+        // Regenerate Apple if snake position equals apple position
+        if  ((snake.position.x == apple.position.x) && (snake.position.y == apple.position.y)) {
+            DrawFruits(&apple, apple_texture, table2D, map_width, map_height,tile_width,tile_height,renderer);
+        }
 
         // Removing snake textures
         SDL_Rect grass_rect_src = { 0, 0, 30, 30};

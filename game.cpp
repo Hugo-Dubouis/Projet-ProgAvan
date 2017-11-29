@@ -28,7 +28,7 @@ void DrawMap(SDL_Surface* screen, SDL_Texture* wall, float** table, int map_widt
 
 ///////////////////////////////////////////////////////
 // Fruit drawing function
-void DrawFruits (SDL_Texture* apple,float** table, int map_width, int map_height, int tile_width, int tile_height, SDL_Renderer * sdlRenderer)
+void DrawFruits (struct Apple* apple, SDL_Texture* apple_texture,float** table, int map_width, int map_height, int tile_width, int tile_height, SDL_Renderer * sdlRenderer)
 {
     int randHeight, randWidth;
     srand(time(NULL));
@@ -38,17 +38,19 @@ void DrawFruits (SDL_Texture* apple,float** table, int map_width, int map_height
 	SDL_Rect Rect_dest;
 	Rect_dest.w = tile_width;
 	Rect_dest.h = tile_height;
+	apple->position.x = randHeight;
+	apple->position.y = randWidth;
 	std::cout<<randHeight;
 	std::cout<<" \n ";
-    std::cout<<randWidth;
+    std::cout<< randWidth;
 	std::cout<<" \n ";
     std::cout<<table[randWidth][randHeight];
 			if (table[randWidth][randHeight] != 49)  {
 				Rect_dest.x = randWidth*tile_width;
 				Rect_dest.y = randHeight*tile_height;
-				SDL_RenderCopy(sdlRenderer, apple, &Rect_source, &Rect_dest);
+				SDL_RenderCopy(sdlRenderer, apple_texture, &Rect_source, &Rect_dest);
 			}
-			else(DrawFruits(apple,table, map_width,map_height,tile_width,tile_height,sdlRenderer));
+			else(DrawFruits(apple, apple_texture,table, map_width,map_height,tile_width,tile_height,sdlRenderer));
 
 }
 

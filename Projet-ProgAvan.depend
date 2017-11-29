@@ -6,7 +6,7 @@
 	<iostream>
 	<fstream>
 
-1511189641 source:c:\users\damien\source\repos\projet-progavan\main.cpp
+1511282855 source:c:\users\damien\source\repos\projet-progavan\main.cpp
 	<SDL2/SDL.h>
 	"game.hpp"
 	"snake.hpp"
@@ -15,8 +15,9 @@
 	<iostream>
 	<fstream>
 
-1511186195 c:\users\damien\source\repos\projet-progavan\game.hpp
+1511966590 c:\users\damien\source\repos\projet-progavan\game.hpp
 	<SDL2/SDL.h>
+	"snake.hpp"
 
 1511186195 c:\users\damien\source\repos\projet-progavan\game.h
 	<SDL2/SDL.h>
@@ -27,18 +28,21 @@
 1511186195 source:c:\users\damien\source\repos\projet-progavan\game.h
 	<SDL2/SDL.h>
 
-1511189630 source:c:\users\damien\source\repos\projet-progavan\game.cpp
+1511966424 source:c:\users\damien\source\repos\projet-progavan\game.cpp
 	<SDL2/SDL.h>
 	"game.hpp"
+	<cstdlib>
+	<ctime>
+	<iostream>
 
-1511187810 source:c:\users\damien\source\repos\projet-progavan\snake.cpp
-	"snake.h"
+1511282855 source:c:\users\damien\source\repos\projet-progavan\snake.cpp
+	"snake.hpp"
 
 1511187456 c:\users\damien\source\repos\projet-progavan\snake.h
 
 1511187456 source:c:\users\damien\source\repos\projet-progavan\snake.h
 
-1511187456 c:\users\damien\source\repos\projet-progavan\snake.hpp
+1511961113 c:\users\damien\source\repos\projet-progavan\snake.hpp
 
 1511281658 source:c:\users\dubou\source\repos\projet-progavan\game.cpp
 	<SDL2/SDL.h>

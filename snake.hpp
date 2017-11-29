@@ -1,4 +1,5 @@
-
+#ifndef SNAKE_H_INCLUDED
+#define SNAKE_H_INCLUDED
 
 ///////////////////////////////////////////////////////
 // Structure describing Snake
@@ -21,4 +22,8 @@ struct Snake {
     int score;
 };
 
+
+
 void snake_clip(int direction);
+
+#endif // SNAKE_H_INCLUDED
