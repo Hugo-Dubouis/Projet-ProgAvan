@@ -158,8 +158,12 @@ int main(int argc, char **argv) {
         i = snake.position.x;
         j = snake.position.y;
 
+
+
+
         // Regenerate Apple if snake position equals apple position
         if  ((snake.position.x == apple.position.x) && (snake.position.y == apple.position.y)) {
+            std::cout<<" Test Boucle ";
             DrawFruits(&apple, apple_texture, table2D, map_width, map_height,tile_width,tile_height,renderer);
         }
 

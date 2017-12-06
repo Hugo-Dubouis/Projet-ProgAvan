@@ -38,8 +38,8 @@ void DrawFruits (struct Apple* apple, SDL_Texture* apple_texture,float** table, 
 	SDL_Rect Rect_dest;
 	Rect_dest.w = tile_width;
 	Rect_dest.h = tile_height;
-	apple->position.x = randHeight;
-	apple->position.y = randWidth;
+	apple->position.y = randHeight;
+	apple->position.x = randWidth;
 	std::cout<<randHeight;
 	std::cout<<" \n ";
     std::cout<< randWidth;
