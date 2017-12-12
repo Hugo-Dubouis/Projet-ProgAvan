@@ -6,83 +6,78 @@
 #include <iostream>
 #include <fstream>
 
-///////////////////////////////////////////////////////
-// Map settings
-
-// Map width and height
-int map_width = 20; // width
-int map_height = 21; // height
-int dim_allocated = 0;
-
-// Blocs dimensions
-const int tile_width = 30;
-const int tile_height = 30;
-
-///////////////////////////////////////////////////////
-// Main program
+using namespace std;
 
 int main(int argc, char **argv) {
-	// Setup SDL2
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0){
-		std::cout << "Error while initializing SDL" << std::endl;
-		return 1;
-	}
 
-	// Setup window
+   	////////////////////////////////
+	// Settings
+
+    // Map width and height
+    int map_width = 20;
+    int map_height = 21;
+    int dim_allocated = 0;
+
+    // Blocs dimensions
+    const int tile_width = 30;
+    const int tile_height = 30;
+
+	// Snake
+	Snake snake;
+	snake.position.x = 5;
+	snake.position.y = 5;
+	snake.direction = 0;
+
+ 	// Snake head sprite clip
+	SDL_Rect snake_head_clip;
+    snake_head_clip ={90, 30, 30, 30};
+
+    // Snake body sprite clip
+    SDL_Rect snake_body_clip;
+    SDL_Rect snake_tail_clip;
+
+    // Snake tail
+    int tailX[100], tailY[100];
+    snake.length = 2;
+
+    // Apple
+    Apple apple;
+
+    // GameOver
+    bool gameOver = false;
+
+  	////////////////////////////////
+	// Initializing SDL2
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0){ std::cout << "Error while initializing SDL" << std::endl; return 1; }
+
+	////////////////////////////////
+	// Window
 	SDL_Window * window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 600, SDL_WINDOW_SHOWN);
-	if (window == nullptr){
-		SDL_Quit();
-		std::cout << "Error while loading window" << std::endl;
-		return 1;
-	}
 
-	// Setup renderer
+	////////////////////////////////
+	// Renderer
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (renderer == NULL)
-	{
-		printf("Error while creating renderer : %s", SDL_GetError());
-		return EXIT_FAILURE;
-	}
+	if (renderer == NULL) { printf("Error while creating renderer : %s", SDL_GetError()); return EXIT_FAILURE;}
 
-    // Setup events
+    ////////////////////////////////
+    // Events
     SDL_Event event;
 
-	// Textures
+    ////////////////////////////////
+	// Surfaces & Textures
 	SDL_Surface* tileset = SDL_LoadBMP("textures/wall.bmp");
-	if (!tileset) // Error
-	{
-		printf("Loading failed : wall.bmp\n");
-		SDL_Quit();
-		system("pause");
-		exit(-1);
-	}
+	if (!tileset) { printf("Loading failed : wall.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
 	SDL_Surface* screen = SDL_LoadBMP("textures/bg.bmp");
-	if (!screen) // Error
-	{
-		printf("Loading failed : bg.bmp\n");
-		SDL_Quit();
-		system("pause");
-		exit(-1);
-	}
+	if (!screen) { printf("Loading failed : bg.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
 
 	SDL_Surface* player = SDL_LoadBMP("textures/snake.bmp");
-	if (!player) // Error
-	{
-		printf("Loading failed : snake.bmp\n");
-		SDL_Quit();
-		system("pause");
-		exit(-1);
-	}
+	if (!player) { printf("Loading failed : snake.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
 	SDL_SetColorKey(player,SDL_TRUE,SDL_MapRGB(player->format, 238, 0, 255));
 
     SDL_Surface* apple_surface = SDL_LoadBMP("textures/apple.bmp");
-	if (!apple_surface) // Error
-	{
-		printf("Loading failed : apple.bmp\n");
-		SDL_Quit();
-		system("pause");
-		exit(-1);
-	}
+    if (!apple_surface) { printf("Loading failed : apple.bmp\n"); SDL_Quit(); system("pause"); exit(-1);}
+
 	SDL_SetColorKey(apple_surface,SDL_TRUE,SDL_MapRGB(apple_surface->format, 238, 0, 255));
 
 	// Creating texture from surface
@@ -106,14 +101,13 @@ int main(int argc, char **argv) {
 	float** table2D;
 	table2D = (float**)malloc(map_width * sizeof(float*));
 
-	for (int dim_allocated = 0;dim_allocated < map_width; dim_allocated++) {
+	for (dim_allocated; dim_allocated < map_width; dim_allocated++) {
 		table2D[dim_allocated] = (float*)malloc(map_height * sizeof(float));
 	}
 
 	// Attributing 2D table values from map file
 
 	int car_actuel;
-	int i, j;
 
 	for (int i = 0; i < map_width; i++) {
 		for (int j = 0; j < map_height; j++) {
@@ -124,111 +118,82 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	Apple apple;
+
 
 	DrawMap(screen,texture_wall, table2D, map_width, map_height, tile_width, tile_height, renderer);
-	DrawFruits(&apple,
-            apple_texture,
-            table2D,
-            map_width,
-            map_height,
-            tile_width,
-            tile_height,
-            renderer);
-
-
-
+	DrawFruits(&apple,apple_texture,table2D,map_width,map_height,tile_width,tile_height,renderer);
     SDL_RenderPresent(renderer);
 
-	// Snake spawn position
-	Snake snake;
-	snake.position.x = 1;
-	snake.position.y = 1;
-
-
-	// Snake head sprite clip
-	SDL_Rect snake_head_clip;
-    snake_head_clip ={90, 30, 30, 30};
-	// Events
-	int quit = 0;
-    while (!quit)
+    // Main loop
+    while (!gameOver)
     {
-        SDL_WaitEvent(&event);
-        // Variables used for collisions detection
-        i = snake.position.x;
-        j = snake.position.y;
+        // Snake head position
+        tailX[0] = snake.position.x;
+        tailY[0] = snake.position.y;
 
-
-
-
-        // Regenerate Apple if snake position equals apple position
-        if  ((snake.position.x == apple.position.x) && (snake.position.y == apple.position.y)) {
-            std::cout<<" Test Boucle ";
-            DrawFruits(&apple, apple_texture, table2D, map_width, map_height,tile_width,tile_height,renderer);
-        }
+        // Snake
+        int prevX = tailX[0];
+        int prevY = tailY[0];
+        int prev2X, prev2Y;
 
         // Removing snake textures
         SDL_Rect grass_rect_src = { 0, 0, 30, 30};
         SDL_Rect grass_rect_dest = { snake.position.x*30, snake.position.y*30, 30, 30};
-
         SDL_RenderCopy(renderer, background, &grass_rect_src, &grass_rect_dest);
-        switch(event.type)
-        {
+
+        //  Events management
+        if (SDL_PollEvent(&event)) {
+            switch(event.type)
+            {
             case SDL_KEYDOWN:
                 switch(event.key.keysym.sym)
                 {
                     case SDLK_ESCAPE: SDL_Quit(); return 0; break;
-                      case SDLK_UP:
-                        if (table2D[i][--j] == 49) { // Collision
-                            break;
-                        }
-                        else {
-                            snake.position.y = --snake.position.y;
+                    case SDLK_UP:
                             snake.direction = 1;
                             snake_head_clip = {90, 0, 30, 30};
+                            snake_body_clip ={60, 30, 30, 30};
+                            snake_tail_clip ={0, 60, 30, 30};
                             break;
-                        };
                     case SDLK_LEFT:
-                         if (table2D[--i][j] == 49) {
-                            break;
-                        }
-                        else {
-                            snake.position.x = --snake.position.x;
                             snake.direction = 2;
                             snake_head_clip = {90, 90, 30, 30};
+                            snake_body_clip ={60, 0, 30, 30};
+                            snake_tail_clip ={60, 60, 30, 30};
                             break;
-                        };
                     case SDLK_RIGHT:
-                        if (table2D[++i][j] == 49) {
-                            break;
-                        }
-                        else {
-                            snake.position.x = ++snake.position.x;
                             snake.direction = 3;
                             snake_head_clip = {90, 30, 30, 30};
+                            snake_body_clip ={60, 0, 30, 30};
+                            snake_tail_clip ={0, 90, 30, 30};
                             break;
-                        };
                     case SDLK_DOWN:
-                        if (table2D[i][++j] == 49) {
-                            break;
-                        }
-                        else {
-                            snake.position.y = ++snake.position.y;
                             snake.direction = 4;
                             snake_head_clip = {90, 60, 30, 30};
+                            snake_body_clip ={60, 30, 30, 30};
+                            snake_tail_clip ={30, 60, 30, 30};
                             break;
-                        };
-
                 }
                 break;
-
+            }
         }
-        SDL_Rect snake_rect_dest = { snake.position.x*30, snake.position.y*30, 30, 30};
-        SDL_RenderCopy(renderer, snake_texture, &snake_head_clip, &snake_rect_dest);
-        SDL_RenderPresent(renderer);
-    }
 
+        // Snake drawing
+        DrawSnake(&snake,background,snake_head_clip,snake_body_clip,snake_tail_clip,snake_texture,renderer,tailX,tailY,prevX,prevY,prev2X,prev2Y);
+        // Collision detection
+        Collision(&apple,&snake,apple_texture,table2D,map_width,map_height,tile_width,tile_height,renderer,&gameOver);
+
+        SDL_RenderPresent(renderer);
+        SDL_Delay(110);
+    }
     // Free memory
     free(table2D);
+
+	SDL_DestroyWindow(window);
+
+	SDL_Quit();
+
+	return 0;
+
 
 }

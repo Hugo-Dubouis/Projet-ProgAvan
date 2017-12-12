@@ -1,5 +1,6 @@
 #ifndef SNAKE_H_INCLUDED
 #define SNAKE_H_INCLUDED
+#include "game.hpp"
 
 ///////////////////////////////////////////////////////
 // Structure describing Snake
@@ -14,6 +15,7 @@ struct Snake {
     struct Position position; // Position is coordinates from x,y axis
     int direction;
     // Direction where the snake is moving
+    // 0 : PAUSE
     // 1 : UP
     // 2 : LEFT
     // 3 : RIGHT
@@ -22,8 +24,11 @@ struct Snake {
     int score;
 };
 
+void DrawSnake (struct Snake* snake,SDL_Texture* bg,const SDL_Rect snake_head_clip,const SDL_Rect snake_body_clip,const SDL_Rect snake_tail_clip, SDL_Texture* snake_texture, SDL_Renderer* sdlRenderer, int* tailX, int* tailY,int prevX,int prevY,int prev2X,int prev2Y);
 
-
-void snake_clip(int direction);
+typedef struct Apple Apple; // Avoid to write "struct Apple" for each new alias of the structure
+struct Apple {
+    struct Position position; // Position is coordinates from x,y axis
+};
 
 #endif // SNAKE_H_INCLUDED
