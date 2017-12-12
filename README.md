@@ -1,5 +1,5 @@
 # Projet-ProgAvan
-Projet Du cours de programmation avancée/ binôme: Damien Thouvenot  et Hugo Dubouis
+Projet du cours de programmation avancée/ binôme: Damien Thouvenot  et Hugo Dubouis
 
 ## TO-DO-LIST
 
