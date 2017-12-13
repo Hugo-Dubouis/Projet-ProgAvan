@@ -150,29 +150,50 @@ int main(int argc, char **argv) {
                 {
                     case SDLK_ESCAPE: SDL_Quit(); return 0; break;
                     case SDLK_UP:
+                        if(snake.direction != 4) {
                             snake.direction = 1;
                             snake_head_clip = {90, 0, 30, 30};
                             snake_body_clip ={60, 30, 30, 30};
                             snake_tail_clip ={0, 60, 30, 30};
                             break;
+                        }
+                        else {
+                            break;
+                        }
+
                     case SDLK_LEFT:
+                        if(snake.direction != 3) {
                             snake.direction = 2;
                             snake_head_clip = {90, 90, 30, 30};
                             snake_body_clip ={60, 0, 30, 30};
                             snake_tail_clip ={60, 60, 30, 30};
                             break;
+                        }
+                        else {
+                            break;
+                        }
                     case SDLK_RIGHT:
+                         if(snake.direction != 2) {
                             snake.direction = 3;
                             snake_head_clip = {90, 30, 30, 30};
                             snake_body_clip ={60, 0, 30, 30};
                             snake_tail_clip ={0, 90, 30, 30};
                             break;
+                        }
+                        else {
+                            break;
+                        }
                     case SDLK_DOWN:
+                          if(snake.direction != 1) {
                             snake.direction = 4;
                             snake_head_clip = {90, 60, 30, 30};
                             snake_body_clip ={60, 30, 30, 30};
                             snake_tail_clip ={30, 60, 30, 30};
                             break;
+                        }
+                        else {
+                            break;
+                        }
                 }
                 break;
             }
