@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
         SDL_RenderCopy(renderer, background, &grass_rect_src, &grass_rect_dest);
 
         //  Events management
-        if (SDL_PollEvent(&event)) {
+        while (SDL_PollEvent(&event)) {
             switch(event.type)
             {
             case SDL_KEYDOWN:
