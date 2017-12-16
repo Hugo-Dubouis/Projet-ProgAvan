@@ -70,13 +70,22 @@ void DrawFruits (struct Apple* apple, SDL_Texture* apple_texture,float** table, 
 
 ///////////////////////////////////////////////////////
 // Collision detection function
-void Collision (struct Apple* apple, struct Snake* snake,SDL_Texture* apple_texture,float** table, int map_width, int map_height, int tile_width, int tile_height, SDL_Renderer * sdlRenderer, bool* gameOver) {
+void Collision (struct Apple* apple, struct Snake* snake,SDL_Texture* apple_texture,float** table, int map_width, int map_height, int tile_width, int tile_height, SDL_Renderer * sdlRenderer, bool* gameOver,int* tailX, int* tailY) {
         // Regenerate Apple if snake position equals apple position
         if  ((snake->position.x == apple->position.x) && (snake->position.y == apple->position.y)) {
             std::cout<< "Fruit!" << std::endl;
             DrawFruits(apple, apple_texture, table, map_width, map_height,tile_width,tile_height,sdlRenderer);
             snake->length++;
         }
+        // Check if the snake touch his tail
+        if(snake->length != 2) {
+            for(int i = 0; i < snake->length; i++) {
+                if((snake->position.x == tailX[i]) && (snake->position.y == tailY[i])) {
+                    *gameOver = true;
+                }
+            }
+        }
+
         /*
         std::cout<< "SNAKE X : " << snake->position.x << " | SNAKE Y : " << snake->position.y  << std::endl;
         std::cout<< "APPLE X : " << apple->position.x << " | APPLE Y : " << apple->position.y  << std::endl;

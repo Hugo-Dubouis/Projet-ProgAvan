@@ -10,10 +10,16 @@ struct Position {
     int y;
 };
 
+struct Direction {
+    int current;
+    int old;
+};
+
 typedef struct Snake Snake; // Avoid to write "struct Snake" for each new alias of the structure
 struct Snake {
     struct Position position; // Position is coordinates from x,y axis
-    int direction;
+    struct Position rotation;
+    struct Direction direction;
     // Direction where the snake is moving
     // 0 : PAUSE
     // 1 : UP

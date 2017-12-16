@@ -1,7 +1,9 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "game.hpp"
 #include "snake.hpp"
 #include <stdio.h>
+#include <string>
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
@@ -26,7 +28,7 @@ int main(int argc, char **argv) {
 	Snake snake;
 	snake.position.x = 5;
 	snake.position.y = 5;
-	snake.direction = 0;
+	snake.direction.current = 0;
 
  	// Snake head sprite clip
 	SDL_Rect snake_head_clip;
@@ -47,12 +49,14 @@ int main(int argc, char **argv) {
     bool gameOver = false;
 
   	////////////////////////////////
-	// Initializing SDL2
+	// Initializing SDL2 & SDL_TTF
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0){ std::cout << "Error while initializing SDL" << std::endl; return 1; }
+
+    TTF_Init();
 
 	////////////////////////////////
 	// Window
-	SDL_Window * window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 600, SDL_WINDOW_SHOWN);
+	SDL_Window * window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 630, SDL_WINDOW_SHOWN);
 
 	////////////////////////////////
 	// Renderer
@@ -80,18 +84,43 @@ int main(int argc, char **argv) {
 
 	SDL_SetColorKey(apple_surface,SDL_TRUE,SDL_MapRGB(apple_surface->format, 238, 0, 255));
 
+	SDL_Surface* score = SDL_LoadBMP("textures/score_bg.bmp");
+	if (!score) { printf("Loading failed : score_bg.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_Surface * scoreSurface = NULL;
+
 	// Creating texture from surface
 	SDL_Texture* texture_wall = SDL_CreateTextureFromSurface(renderer, tileset);
 	SDL_Texture * background = SDL_CreateTextureFromSurface(renderer, screen);
     SDL_Texture * snake_texture = SDL_CreateTextureFromSurface(renderer, player);
     SDL_Texture * apple_texture = SDL_CreateTextureFromSurface(renderer, apple_surface);
+    SDL_Texture * score_bg = SDL_CreateTextureFromSurface(renderer, score);
+    SDL_Texture * scoreTexture = NULL;
+
 
     SDL_FreeSurface(tileset);
     SDL_FreeSurface(screen);
     SDL_FreeSurface(player);
     SDL_FreeSurface(apple_surface);
+    SDL_FreeSurface(score);
 
+    // Setting the background
 	SDL_RenderCopy(renderer, background, NULL, NULL);
+
+	// Setting the score background
+	SDL_Rect score_src = { 0, 0, 600, 30};
+	SDL_Rect score_dest = { 0, 600, 600, 30};
+
+    ////////////////////////////////
+	// Font
+    TTF_Font * font = TTF_OpenFont("fonts/OpenSans-Regular.ttf", 15);
+    if (!font) { printf("Loading failed : arial.ttf\n"); SDL_Quit(); system("pause"); exit(-1); }
+    SDL_Color color = { 255, 255, 255 };
+    int texW = 0;
+    int texH = 0;
+
+    ////////////////////////////////
+	// Map file reading
 
 	// Opening map file
 	FILE *fmap;
@@ -118,13 +147,11 @@ int main(int argc, char **argv) {
 		}
 	}
 
-
-
-	DrawMap(screen,texture_wall, table2D, map_width, map_height, tile_width, tile_height, renderer);
+    // 1st fruit drawing
 	DrawFruits(&apple,apple_texture,table2D,map_width,map_height,tile_width,tile_height,renderer);
-    SDL_RenderPresent(renderer);
 
-    // Main loop
+    ////////////////////////////////
+	// Main Game loop
     while (!gameOver)
     {
         // Snake head position
@@ -150,8 +177,11 @@ int main(int argc, char **argv) {
                 {
                     case SDLK_ESCAPE: SDL_Quit(); return 0; break;
                     case SDLK_UP:
-                        if(snake.direction != 4) {
-                            snake.direction = 1;
+                        if(snake.direction.current != 4 && snake.direction.current != 1) {
+                            snake.direction.current = 1;
+                            snake.rotation.x = snake.position.x;
+                            snake.rotation.y = snake.position.y;
+                            std::cout << "X = " << snake.rotation.x << " Y= " << snake.rotation.y << std::endl;
                             snake_head_clip = {90, 0, 30, 30};
                             snake_body_clip ={60, 30, 30, 30};
                             snake_tail_clip ={0, 60, 30, 30};
@@ -162,8 +192,11 @@ int main(int argc, char **argv) {
                         }
 
                     case SDLK_LEFT:
-                        if(snake.direction != 3) {
-                            snake.direction = 2;
+                        if(snake.direction.current != 3 && snake.direction.current != 2) {
+                            snake.direction.current = 2;
+                            snake.rotation.x = snake.position.x;
+                            snake.rotation.y = snake.position.y;
+                            std::cout << "X = " << snake.rotation.x << " Y= " << snake.rotation.y << std::endl;
                             snake_head_clip = {90, 90, 30, 30};
                             snake_body_clip ={60, 0, 30, 30};
                             snake_tail_clip ={60, 60, 30, 30};
@@ -173,8 +206,11 @@ int main(int argc, char **argv) {
                             break;
                         }
                     case SDLK_RIGHT:
-                         if(snake.direction != 2) {
-                            snake.direction = 3;
+                         if(snake.direction.current != 2 && snake.direction.current != 3) {
+                            snake.direction.current = 3;
+                            snake.rotation.x = snake.position.x;
+                            snake.rotation.y = snake.position.y;
+                            std::cout << "X = " << snake.rotation.x << " Y= " << snake.rotation.y << std::endl;
                             snake_head_clip = {90, 30, 30, 30};
                             snake_body_clip ={60, 0, 30, 30};
                             snake_tail_clip ={0, 90, 30, 30};
@@ -184,8 +220,11 @@ int main(int argc, char **argv) {
                             break;
                         }
                     case SDLK_DOWN:
-                          if(snake.direction != 1) {
-                            snake.direction = 4;
+                          if(snake.direction.current != 1 && snake.direction.current != 4) {
+                            snake.direction.current = 4;
+                            snake.rotation.x = snake.position.x;
+                            snake.rotation.y = snake.position.y;
+                            std::cout << "X = " << snake.rotation.x << " Y= " << snake.rotation.y << std::endl;
                             snake_head_clip = {90, 60, 30, 30};
                             snake_body_clip ={60, 30, 30, 30};
                             snake_tail_clip ={30, 60, 30, 30};
@@ -199,12 +238,34 @@ int main(int argc, char **argv) {
             }
         }
 
+         // Map drawing
+        DrawMap(screen,texture_wall, table2D, map_width, map_height, tile_width, tile_height, renderer);
         // Snake drawing
         DrawSnake(&snake,background,snake_head_clip,snake_body_clip,snake_tail_clip,snake_texture,renderer,tailX,tailY,prevX,prevY,prev2X,prev2Y);
         // Collision detection
-        Collision(&apple,&snake,apple_texture,table2D,map_width,map_height,tile_width,tile_height,renderer,&gameOver);
+        Collision(&apple,&snake,apple_texture,table2D,map_width,map_height,tile_width,tile_height,renderer,&gameOver,tailX,tailY);
+        // Memorizing old snake direction
+        snake.direction.old = snake.direction.current;
+        // Score background
+        SDL_RenderCopy(renderer, score_bg, &score_src, &score_dest);
+
+        // Score
+        char score[10] = "";
+        sprintf(score, "Score : %d", (snake.length-2)*100);
+
+        SDL_FreeSurface(scoreSurface);
+        SDL_DestroyTexture(scoreTexture);
+
+        SDL_Surface * scoreSurface = TTF_RenderText_Blended(font, score, color);
+        SDL_Texture * scoreTexture = SDL_CreateTextureFromSurface(renderer,scoreSurface);
+
+        SDL_QueryTexture(scoreTexture, NULL, NULL, &texW, &texH);
+        SDL_Rect score_dest = { 5, 605, texW, texH};
+
+        SDL_RenderCopy(renderer, scoreTexture, NULL, &score_dest);
 
         SDL_RenderPresent(renderer);
+
         SDL_Delay(110);
     }
     // Free memory
@@ -212,6 +273,7 @@ int main(int argc, char **argv) {
 
 	SDL_DestroyWindow(window);
 
+	TTF_Quit();
 	SDL_Quit();
 
 	return 0;

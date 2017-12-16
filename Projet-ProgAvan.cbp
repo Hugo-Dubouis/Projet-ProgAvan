@@ -38,6 +38,9 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Linker>
+			<Add library="SDL2_ttf" />
+		</Linker>
 		<Unit filename="game.cpp" />
 		<Unit filename="game.hpp" />
 		<Unit filename="main.cpp" />
