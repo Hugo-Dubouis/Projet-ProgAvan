@@ -44,7 +44,7 @@ void DrawMap(SDL_Surface* screen, SDL_Texture* wall, float** table, int map_widt
 
 ///////////////////////////////////////////////////////
 // Fruit drawing function
-void DrawFruits (struct Apple* apple, SDL_Texture* apple_texture,float** table, int map_width, int map_height, int tile_width, int tile_height, SDL_Renderer * sdlRenderer)
+void DrawFruits (struct Apple* apple, SDL_Texture* apple_texture,float** table, int map_width, int map_height, int tile_width, int tile_height, SDL_Renderer * sdlRenderer, struct Snake* snake, int* tailX, int* tailY)
 {
     int randHeight, randWidth;
     srand(time(0));
@@ -59,12 +59,19 @@ void DrawFruits (struct Apple* apple, SDL_Texture* apple_texture,float** table, 
 	std::cout<< randWidth << std::endl;
 	std::cout<< randHeight << std::endl;
 	std::cout<< table[randWidth][randHeight] << std::endl;
-			if (table[randWidth][randHeight] != 49)  {
-				Rect_dest.x = randWidth*tile_width;
-				Rect_dest.y = randHeight*tile_height;
-				SDL_RenderCopy(sdlRenderer, apple_texture, &Rect_source, &Rect_dest);
+            // We check if random coordinates are not in a wall or the snake's head
+			if ((table[randWidth][randHeight] != 49) && (snake->position.x != randWidth) && (snake->position.y != randHeight) )  {
+                // After that we also check if the random coordinates
+                for (int k = 0; k < snake->length; k++) {
+                    if ((tailX[k] != randHeight) && (tailY[k] != randWidth)) {
+                        Rect_dest.x = randWidth*tile_width;
+                        Rect_dest.y = randHeight*tile_height;
+                        SDL_RenderCopy(sdlRenderer, apple_texture, &Rect_source, &Rect_dest);
+                    }
+                }
 			}
-			else(DrawFruits(apple, apple_texture,table, map_width,map_height,tile_width,tile_height,sdlRenderer));
+
+			else(DrawFruits(apple, apple_texture,table, map_width,map_height,tile_width,tile_height,sdlRenderer,snake,tailX,tailY));
 
 }
 
@@ -74,7 +81,7 @@ void Collision (struct Apple* apple, struct Snake* snake,SDL_Texture* apple_text
         // Regenerate Apple if snake position equals apple position
         if  ((snake->position.x == apple->position.x) && (snake->position.y == apple->position.y)) {
             std::cout<< "Fruit!" << std::endl;
-            DrawFruits(apple, apple_texture, table, map_width, map_height,tile_width,tile_height,sdlRenderer);
+            DrawFruits(apple, apple_texture, table, map_width, map_height,tile_width,tile_height,sdlRenderer,snake,tailX,tailY);
             snake->length++;
         }
         // Check if the snake touch his tail

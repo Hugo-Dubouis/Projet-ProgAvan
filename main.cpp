@@ -45,6 +45,9 @@ int main(int argc, char **argv) {
     // Apple
     Apple apple;
 
+    // MainMenu
+    bool mainMenu = false;
+
     // GameOver
     bool gameOver = false;
 
@@ -69,6 +72,7 @@ int main(int argc, char **argv) {
 
     ////////////////////////////////
 	// Surfaces & Textures
+	// Game
 	SDL_Surface* tileset = SDL_LoadBMP("textures/wall.bmp");
 	if (!tileset) { printf("Loading failed : wall.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
 	SDL_Surface* screen = SDL_LoadBMP("textures/bg.bmp");
@@ -89,23 +93,68 @@ int main(int argc, char **argv) {
 
 	SDL_Surface * scoreSurface = NULL;
 
+	// Menu
+	SDL_Surface* screenMenu = SDL_LoadBMP("textures/menu_bg.bmp");
+	if (!screenMenu) { printf("Loading failed : menu_bg.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_Surface* buttonMenu1 = SDL_LoadBMP("textures/mainMenu1.bmp");
+	if (!buttonMenu1) { printf("Loading failed : mainMenu1.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_Surface* buttonMenu1_selected = SDL_LoadBMP("textures/mainMenu1_selected.bmp");
+	if (!buttonMenu1_selected) { printf("Loading failed : mainMenu1_selected.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_Surface* buttonMenu2 = SDL_LoadBMP("textures/mainMenu2.bmp");
+	if (!buttonMenu2) { printf("Loading failed : mainMenu2.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_Surface* buttonMenu2_selected = SDL_LoadBMP("textures/mainMenu2_selected.bmp");
+	if (!buttonMenu2_selected) { printf("Loading failed : mainMenu2_selected.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_Surface* buttonMenu3 = SDL_LoadBMP("textures/mainMenu3.bmp");
+	if (!buttonMenu3) { printf("Loading failed : mainMenu3.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_Surface* buttonMenu3_selected = SDL_LoadBMP("textures/mainMenu3_selected.bmp");
+	if (!buttonMenu3_selected) { printf("Loading failed : mainMenu3_selected.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_Surface* buttonMenu4 = SDL_LoadBMP("textures/mainMenu4.bmp");
+	if (!buttonMenu4) { printf("Loading failed : mainMenu4.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_Surface* buttonMenu4_selected = SDL_LoadBMP("textures/mainMenu4_selected.bmp");
+	if (!buttonMenu4_selected) { printf("Loading failed : mainMenu4_selected.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
 	// Creating texture from surface
+	// Game
 	SDL_Texture* texture_wall = SDL_CreateTextureFromSurface(renderer, tileset);
 	SDL_Texture * background = SDL_CreateTextureFromSurface(renderer, screen);
     SDL_Texture * snake_texture = SDL_CreateTextureFromSurface(renderer, player);
     SDL_Texture * apple_texture = SDL_CreateTextureFromSurface(renderer, apple_surface);
     SDL_Texture * score_bg = SDL_CreateTextureFromSurface(renderer, score);
     SDL_Texture * scoreTexture = NULL;
+    // Menu
+    SDL_Texture * menu_bg = SDL_CreateTextureFromSurface(renderer, screenMenu);
+    SDL_Texture * menuPlay = SDL_CreateTextureFromSurface(renderer, buttonMenu1);
+    SDL_Texture * menuPlay_selected = SDL_CreateTextureFromSurface(renderer, buttonMenu1_selected);
+    SDL_Texture * menuSelectLevel = SDL_CreateTextureFromSurface(renderer, buttonMenu2);
+    SDL_Texture * menuSelectLevel_selected = SDL_CreateTextureFromSurface(renderer, buttonMenu2_selected);
+    SDL_Texture * menuOptions = SDL_CreateTextureFromSurface(renderer, buttonMenu3);
+    SDL_Texture * menuOptions_selected = SDL_CreateTextureFromSurface(renderer, buttonMenu3_selected);
+    SDL_Texture * menuQuit = SDL_CreateTextureFromSurface(renderer, buttonMenu4);
+    SDL_Texture * menuQuit_selected = SDL_CreateTextureFromSurface(renderer, buttonMenu4_selected);
 
-
+    // Liberating memory used for surface
     SDL_FreeSurface(tileset);
     SDL_FreeSurface(screen);
     SDL_FreeSurface(player);
     SDL_FreeSurface(apple_surface);
     SDL_FreeSurface(score);
 
-    // Setting the background
-	SDL_RenderCopy(renderer, background, NULL, NULL);
+	/* Liberating memory used for textures
+    SDL_DestroyTexture(texture_wall);
+    SDL_DestroyTexture(background);
+    SDL_DestroyTexture(snake_texture);
+    SDL_DestroyTexture(apple_texture);
+    SDL_DestroyTexture(score_bg);
+    SDL_DestroyTexture(scoreTexture);
+    */
 
 	// Setting the score background
 	SDL_Rect score_src = { 0, 0, 600, 30};
@@ -118,6 +167,87 @@ int main(int argc, char **argv) {
     SDL_Color color = { 255, 255, 255 };
     int texW = 0;
     int texH = 0;
+
+    ////////////////////////////////
+    // Main menu
+    int selectedMenu =0;
+    // Setting Button coordinates
+    SDL_Rect buttonMenu1_dst = { 114, 216, 372, 56};
+    SDL_Rect buttonMenu2_dst = { 114, 300, 372, 56};
+    SDL_Rect buttonMenu3_dst = { 114, 384, 372, 56};
+    SDL_Rect buttonMenu4_dst = { 114, 468, 372, 56};
+	while(!mainMenu) {
+
+
+        // Main menu background
+        SDL_RenderCopy(renderer, menu_bg, NULL, NULL);
+
+        SDL_WaitEvent(&event);
+            switch(event.type)
+            {
+            case SDL_KEYDOWN:
+                switch(event.key.keysym.sym)
+                {
+                    case SDLK_ESCAPE: SDL_Quit(); return 0; break;
+                    case SDLK_UP :
+                        if(selectedMenu>0) {
+                           selectedMenu--;
+                        }
+                        else {selectedMenu=3;}
+                        break;
+                    case SDLK_DOWN :
+                        if(selectedMenu < 3) {
+                            selectedMenu++;
+                        }
+                        else {selectedMenu=0;}
+                        break;
+                    case SDLK_RETURN :
+                        if(selectedMenu == 0) {
+                            mainMenu = true;
+
+
+                        }
+                        else if (selectedMenu == 1) {
+                            std::cout << "Work in progress !" << std::endl;
+                        }
+                        else if (selectedMenu == 2) {
+                            std::cout << "Work in progress !" << std::endl;
+                        }
+                        else if (selectedMenu == 3){
+                            SDL_Quit(); return 0; break;
+                        }
+                        else {}
+                }
+            }
+        SDL_RenderCopy(renderer, menuPlay, NULL, &buttonMenu1_dst);
+        SDL_RenderCopy(renderer, menuSelectLevel, NULL, &buttonMenu2_dst);
+        SDL_RenderCopy(renderer, menuOptions, NULL, &buttonMenu3_dst);
+        SDL_RenderCopy(renderer, menuQuit, NULL, &buttonMenu4_dst);
+
+        // Play button selected
+        if(selectedMenu == 0) {
+            SDL_RenderCopy(renderer, menuPlay_selected, NULL, &buttonMenu1_dst);
+        }
+        // SelectLevel button selected
+        else if (selectedMenu == 1) {
+            SDL_RenderCopy(renderer, menuSelectLevel_selected, NULL, &buttonMenu2_dst);
+        }
+        // Options button selected
+        else if (selectedMenu == 2) {
+            SDL_RenderCopy(renderer, menuOptions_selected, NULL, &buttonMenu3_dst);
+        }
+        // Quit button selected
+        else if (selectedMenu == 3){
+            SDL_RenderCopy(renderer, menuQuit_selected, NULL, &buttonMenu4_dst);
+        }
+        else {}
+
+        std::cout << selectedMenu << std::endl;
+        SDL_RenderPresent(renderer);
+	}
+
+    // Clearing renderer from main menu
+    SDL_RenderClear(renderer);
 
     ////////////////////////////////
 	// Map file reading
@@ -147,8 +277,11 @@ int main(int argc, char **argv) {
 		}
 	}
 
+    // Setting the background
+	SDL_RenderCopy(renderer, background, NULL, NULL);
+
     // 1st fruit drawing
-	DrawFruits(&apple,apple_texture,table2D,map_width,map_height,tile_width,tile_height,renderer);
+	DrawFruits(&apple,apple_texture,table2D,map_width,map_height,tile_width,tile_height,renderer,&snake,tailX,tailY);
 
     ////////////////////////////////
 	// Main Game loop

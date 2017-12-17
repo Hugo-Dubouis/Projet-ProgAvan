@@ -99,26 +99,7 @@ void DrawSnake (struct Snake* snake,SDL_Texture* bg,const SDL_Rect snake_head_cl
 
                 }
             }
-            if(snake->length > 3) {
-               // Removing body parts (Necessary to avoid overwriting texture on the snake tail !)
-            SDL_Rect grass_rect_dest1 = { tailX[((snake->length)-1)]*30, tailY[((snake->length)-1)]*30, 30, 30};
-            SDL_RenderCopy(sdlRenderer, bg, &grass_rect_src, &grass_rect_dest1);
 
-            if(memDir == 1) { snake_tail_clip2 ={0, 60, 30, 30}; }
-            else if(memDir == 2) { snake_tail_clip2 ={60, 60, 30, 30}; }
-            else if(memDir == 3) { snake_tail_clip2 ={0, 90, 30, 30}; }
-            else if(memDir == 4) { snake_tail_clip2 ={30, 60, 30, 30}; }
-            else {}
-
-            // Render tail
-            SDL_Rect snake_tail_rect_dest = { tailX[(snake->length)-1]*30, tailY[(snake->length)-1]*30, 30, 30};
-            SDL_RenderCopy(sdlRenderer, snake_texture, &snake_tail_clip2, &snake_tail_rect_dest);
-            }
-            else {
-             // Render tail
-            SDL_Rect snake_tail_rect_dest = { tailX[(snake->length)-1]*30, tailY[(snake->length)-1]*30, 30, 30};
-            SDL_RenderCopy(sdlRenderer, snake_texture, &snake_tail_clip, &snake_tail_rect_dest);
-            }
 
 
 
