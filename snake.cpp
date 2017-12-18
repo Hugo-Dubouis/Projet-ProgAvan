@@ -97,8 +97,6 @@ void DrawSnake (struct Snake* snake,SDL_Texture* bg,const SDL_Rect snake_head_cl
             // Removing body parts for snake move
             SDL_Rect grass_rect_dest2 = { tailX[((snake->length))]*30, tailY[((snake->length))]*30, 30, 30};
             SDL_RenderCopy(sdlRenderer, bg, &grass_rect_src, &grass_rect_dest2);
-
-
         }
 
         // Snake head render

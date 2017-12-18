@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
 	snake.position.y = 5;
 	snake.direction.current = 0;
 	snake.score = 0;
+	snake.speed = 110;
 
  	// Snake head sprite clip
 	SDL_Rect snake_head_clip ={90, 30, 30, 30};
@@ -38,7 +39,7 @@ int main(int argc, char **argv) {
     SDL_Rect snake_body_clip;
     SDL_Rect snake_tail_clip;
 
-    // Snake tail
+    // Snake tail [Max size is 100 body parts]
     int tailX[100], tailY[100];
     snake.length = 2;
 
@@ -48,6 +49,7 @@ int main(int argc, char **argv) {
     // Menu booleans
     bool mainMenu = false;
     bool mainMenu_SelectLevel = false;
+    bool mainMenu_Options = false;
 
     // gameRunning boolean
     bool gameRunning = false;
@@ -61,6 +63,12 @@ int main(int argc, char **argv) {
     // 1 : Normal mode : You progress from level 1 to level 6.
     // When you reach a score of 2500 on a level you pass to the next level.
     // 2 : Score Mode : You choose a level and you can try to get the best score.
+
+    // Game commands
+    int gameCommands = 0;
+    // 0 : Normal mode with keyboard arrows
+    // 1 : ZQSD mode on the keyboard
+    // 2 : Joystick mode
 
   	////////////////////////////////
 	// Initializing SDL2 & SDL_TTF
@@ -111,6 +119,9 @@ int main(int argc, char **argv) {
 	SDL_Surface* screenMenuSelectLevel = SDL_LoadBMP("textures/menu_SelectLevel_bg.bmp");
 	if (!screenMenuSelectLevel) { printf("Loading failed : menu_SelectLevel_bg.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
 
+	SDL_Surface* screenMenuSettings = SDL_LoadBMP("textures/bg_settings.bmp");
+	if (!screenMenuSettings) { printf("Loading failed : bg_settings.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
 	SDL_Surface* buttonMenu = SDL_LoadBMP("textures/buttonMenu.bmp");
 	if (!buttonMenu) { printf("Loading failed : buttonMenu.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
 
@@ -127,6 +138,16 @@ int main(int argc, char **argv) {
 
 	SDL_SetColorKey(arrowMenuDown_surface,SDL_TRUE,SDL_MapRGB(arrowMenuDown_surface->format, 238, 0, 255));
 
+	SDL_Surface* arrowMenuLeft_surface = SDL_LoadBMP("textures/arrow_left.bmp");
+	if (!arrowMenuLeft_surface) { printf("Loading failed : arrow_left.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_SetColorKey(arrowMenuLeft_surface,SDL_TRUE,SDL_MapRGB(arrowMenuLeft_surface->format, 238, 0, 255));
+
+	SDL_Surface* arrowMenuRight_surface = SDL_LoadBMP("textures/arrow_right.bmp");
+	if (!arrowMenuRight_surface) { printf("Loading failed : arrow_right.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_SetColorKey(arrowMenuRight_surface,SDL_TRUE,SDL_MapRGB(arrowMenuRight_surface->format, 238, 0, 255));
+
 	// GameOver Menu
     SDL_Surface* screenGameOver = SDL_LoadBMP("textures/bg_gameOver.bmp");
 	if (!screenGameOver) { printf("Loading failed : bg_gameOver.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
@@ -142,10 +163,13 @@ int main(int argc, char **argv) {
     // Menu
     SDL_Texture * menu_bg = SDL_CreateTextureFromSurface(renderer, screenMenu);
     SDL_Texture * menu_SelectLevel_bg = SDL_CreateTextureFromSurface(renderer, screenMenuSelectLevel);
+    SDL_Texture * menu_Settings_bg = SDL_CreateTextureFromSurface(renderer, screenMenuSettings);
     SDL_Texture * menuButton = SDL_CreateTextureFromSurface(renderer, buttonMenu);
     SDL_Texture * menuButton_selected = SDL_CreateTextureFromSurface(renderer, buttonMenu_selected);
     SDL_Texture * arrowUp = SDL_CreateTextureFromSurface(renderer, arrowMenuUp_surface);
     SDL_Texture * arrowDown = SDL_CreateTextureFromSurface(renderer, arrowMenuDown_surface);
+    SDL_Texture * arrowLeft = SDL_CreateTextureFromSurface(renderer, arrowMenuLeft_surface);
+    SDL_Texture * arrowRight = SDL_CreateTextureFromSurface(renderer, arrowMenuRight_surface);
 
     // Game Over Menu
     SDL_Texture * gameOver_bg = SDL_CreateTextureFromSurface(renderer, screenGameOver);
@@ -158,13 +182,16 @@ int main(int argc, char **argv) {
     SDL_FreeSurface(score_bg_surface);
     SDL_FreeSurface(screenMenu);
     SDL_FreeSurface(screenMenuSelectLevel);
+    SDL_FreeSurface(screenMenuSettings);
     SDL_FreeSurface(buttonMenu);
     SDL_FreeSurface(buttonMenu_selected);
     SDL_FreeSurface(screenGameOver);
     SDL_FreeSurface(arrowMenuUp_surface);
     SDL_FreeSurface(arrowMenuDown_surface);
+    SDL_FreeSurface(arrowMenuLeft_surface);
+    SDL_FreeSurface(arrowMenuRight_surface);
 
-	// Setting the score background
+	// Setting the score background coordinates
 	SDL_Rect score_src = { 0, 0, 600, 30};
 	SDL_Rect score_dest = { 0, 600, 600, 30};
 
@@ -184,6 +211,9 @@ int main(int argc, char **argv) {
     // Variables for menu and level selection
     int selectedMenu = 0;
     int selectedLevelMenu = 0;
+    int selectedSettingsMenu = 0;
+    int selectedSettingsMenu_difficulty = 1;
+    int selectedSettingsMenu_commands = 0;
     int selectedGameOverMenu = 0;
     int SelectedLevel;
 
@@ -194,6 +224,10 @@ int main(int argc, char **argv) {
     SDL_Rect buttonMenu4_dst = { 114, 468, 372, 56};
     SDL_Rect arrowMenuUp_dst = { 282, 240, 37, 37};
     SDL_Rect arrowMenuDown_dst = { 282, 558, 37, 37};
+    SDL_Rect arrowMenuLeft1_dst = { 141, 311, 37, 37};
+    SDL_Rect arrowMenuRight1_dst = { 422, 311, 37, 37};
+    SDL_Rect arrowMenuLeft2_dst = { 141, 395, 37, 37};
+    SDL_Rect arrowMenuRight2_dst = { 422, 395, 37, 37};
 	while(!mainMenu) {
 
         // Main menu background
@@ -207,16 +241,44 @@ int main(int argc, char **argv) {
                 {
                     case SDLK_ESCAPE: SDL_Quit(); return 0; break;
                     case SDLK_UP :
-                        if(selectedMenu>0) {
-                           selectedMenu--;
+                        if(gameCommands == 0) {
+                            if(selectedMenu>0) {
+                               selectedMenu--;
+                            }
+                            else {
+                                selectedMenu=3;
+                            }
                         }
-                        else {selectedMenu=3;}
                         break;
                     case SDLK_DOWN :
-                        if(selectedMenu < 3) {
-                            selectedMenu++;
+                        if(gameCommands == 0) {
+                            if(selectedMenu < 3) {
+                                selectedMenu++;
+                            }
+                            else {
+                                selectedMenu=0;
+                            }
                         }
-                        else {selectedMenu=0;}
+                        break;
+                    case SDLK_z :
+                        if(gameCommands == 1) {
+                            if(selectedMenu>0) {
+                               selectedMenu--;
+                            }
+                            else {
+                                selectedMenu=3;
+                            }
+                        }
+                        break;
+                    case SDLK_s :
+                        if(gameCommands == 1) {
+                            if(selectedMenu < 3) {
+                                selectedMenu++;
+                            }
+                            else {
+                                selectedMenu=0;
+                            }
+                        }
                         break;
                     case SDLK_RETURN :
                         if(selectedMenu == 0) {
@@ -228,7 +290,7 @@ int main(int argc, char **argv) {
                             mainMenu_SelectLevel = true;
                         }
                         else if (selectedMenu == 2) {
-                            std::cout << "Work in progress !" << std::endl;
+                            mainMenu_Options = true;
                         }
                         else if (selectedMenu == 3){
                             SDL_Quit(); return 0; break;
@@ -244,7 +306,7 @@ int main(int argc, char **argv) {
                             mainMenu_SelectLevel = true;
                         }
                         else if (selectedMenu == 2) {
-                            std::cout << "Work in progress !" << std::endl;
+                            mainMenu_Options = true;
                         }
                         else if (selectedMenu == 3){
                             SDL_Quit(); return 0; break;
@@ -308,7 +370,7 @@ int main(int argc, char **argv) {
 
 
         ////////////////////////////////
-        // Level selecting loop
+        // Level selecting menu
         while(mainMenu_SelectLevel) {
             // Clearing renderer from main menu
             SDL_RenderClear(renderer);
@@ -324,16 +386,44 @@ int main(int argc, char **argv) {
                 {
                     case SDLK_ESCAPE: SDL_Quit(); return 0; break;
                     case SDLK_UP :
-                        if(selectedLevelMenu>0) {
-                           selectedLevelMenu--;
+                        if(gameCommands == 0) {
+                            if(selectedLevelMenu>0) {
+                               selectedLevelMenu--;
+                            }
+                            else {
+                                selectedLevelMenu=5;
+                            }
                         }
-                        else {selectedLevelMenu=5;}
                         break;
                     case SDLK_DOWN :
-                        if(selectedLevelMenu < 5) {
-                            selectedLevelMenu++;
+                        if(gameCommands == 0) {
+                            if(selectedLevelMenu < 5) {
+                                selectedLevelMenu++;
+                            }
+                            else {
+                                selectedLevelMenu=0;
+                            }
                         }
-                        else {selectedLevelMenu=0;}
+                        break;
+                    case SDLK_z :
+                        if(gameCommands == 1) {
+                            if(selectedLevelMenu>0) {
+                               selectedLevelMenu--;
+                            }
+                            else {
+                                selectedLevelMenu=5;
+                            }
+                        }
+                        break;
+                    case SDLK_s :
+                        if(gameCommands == 1) {
+                            if(selectedLevelMenu < 5) {
+                                selectedLevelMenu++;
+                            }
+                            else {
+                                selectedLevelMenu=0;
+                            }
+                        }
                         break;
                     case SDLK_RETURN :
                         if(selectedLevelMenu == 0) {
@@ -498,6 +588,190 @@ int main(int argc, char **argv) {
             SDL_RenderPresent(renderer);
 
         }
+
+        ////////////////////////////////
+        // Settings menu
+        while(mainMenu_Options) {
+            // Clearing renderer from main menu
+            SDL_RenderClear(renderer);
+
+            // Main menu background
+            SDL_RenderCopy(renderer, menu_Settings_bg, NULL, NULL);
+
+            SDL_WaitEvent(&event);
+            switch(event.type)
+            {
+            case SDL_KEYDOWN:
+                switch(event.key.keysym.sym)
+                {
+                    case SDLK_ESCAPE: SDL_Quit(); return 0; break;
+                    case SDLK_UP :
+                        if(gameCommands == 0) {
+                            if(selectedSettingsMenu>0) {
+                               selectedSettingsMenu--;
+                            }
+                            else {
+                                selectedSettingsMenu=2;
+                            }
+                        }
+                        break;
+                    case SDLK_DOWN :
+                        if(gameCommands == 0) {
+                            if(selectedSettingsMenu < 2) {
+                                selectedSettingsMenu++;
+                            }
+                            else {
+                                selectedSettingsMenu=0;
+                            }
+                        }
+                        break;
+                    case SDLK_z :
+                        if(gameCommands == 1) {
+                            if(selectedSettingsMenu>0) {
+                               selectedSettingsMenu--;
+                            }
+                            else {
+                                selectedSettingsMenu=2;
+                            }
+                        }
+                        break;
+                    case SDLK_s :
+                        if(gameCommands == 1) {
+                            if(selectedSettingsMenu < 2) {
+                                selectedSettingsMenu++;
+                            }
+                            else {
+                                selectedSettingsMenu=0;
+                            }
+                        }
+                        break;
+                    case SDLK_LEFT:
+                        if(selectedSettingsMenu == 0) {
+                            if(selectedSettingsMenu_difficulty > 0) {
+                                selectedSettingsMenu_difficulty--;
+                            }
+                            else {selectedSettingsMenu_difficulty = 2;}
+                        }
+                        if(selectedSettingsMenu == 1) {
+                            if(selectedSettingsMenu_commands > 0) {
+                                selectedSettingsMenu_commands--;
+                            }
+                            else {selectedSettingsMenu_commands = 1;}
+                        }
+                        break;
+                    case SDLK_RIGHT:
+                        if(selectedSettingsMenu == 0) {
+                            if(selectedSettingsMenu_difficulty < 2) {
+                                selectedSettingsMenu_difficulty++;
+                            }
+                            else {selectedSettingsMenu_difficulty=0;}
+                        }
+                        if(selectedSettingsMenu == 1) {
+                            if(selectedSettingsMenu_commands < 1) {
+                                selectedSettingsMenu_commands++;
+                            }
+                            else {selectedSettingsMenu_commands = 0;}
+                        }
+                        break;
+                    case SDLK_RETURN :
+                        if(selectedSettingsMenu == 2) {
+                            mainMenu_Options = false;
+                        }
+                        else {}
+                     case SDLK_KP_ENTER :
+                        if(selectedSettingsMenu == 2) {
+                            mainMenu_Options = false;
+                        }
+                        else {}
+
+                }
+            }
+            // Button background
+            SDL_RenderCopy(renderer, menuButton, NULL, &buttonMenu2_dst);
+            SDL_RenderCopy(renderer, menuButton, NULL, &buttonMenu3_dst);
+            SDL_RenderCopy(renderer, menuButton, NULL, &buttonMenu4_dst);
+
+            if(selectedSettingsMenu == 0) {
+                SDL_RenderCopy(renderer, menuButton_selected, NULL, &buttonMenu2_dst);
+            }
+            else if (selectedSettingsMenu == 1) {
+                SDL_RenderCopy(renderer, menuButton_selected, NULL, &buttonMenu3_dst);
+            }
+            else if (selectedSettingsMenu == 2) {
+                SDL_RenderCopy(renderer, menuButton_selected, NULL, &buttonMenu4_dst);
+            }
+            else {}
+
+            if(selectedSettingsMenu_difficulty == 0) {
+                 // Button Easy text
+                SDL_Surface * textMenuSelect_surface = TTF_RenderText_Blended(fontMenu, "Facile", color);
+                SDL_Texture * textMenuSelect_texture = SDL_CreateTextureFromSurface(renderer,textMenuSelect_surface);
+                SDL_QueryTexture(textMenuSelect_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuSelect_dest = { 255, 309, texW, texH};
+                SDL_RenderCopy(renderer, textMenuSelect_texture, NULL, &textMenuSelect_dest);
+                // Set difficult level (speed)
+                snake.speed = 135;
+            }
+            if (selectedSettingsMenu_difficulty == 1) {
+                 // Button Normal text
+                SDL_Surface * textMenuSelect_surface = TTF_RenderText_Blended(fontMenu, "Normal", color);
+                SDL_Texture * textMenuSelect_texture = SDL_CreateTextureFromSurface(renderer,textMenuSelect_surface);
+                SDL_QueryTexture(textMenuSelect_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuSelect_dest = { 255, 309, texW, texH};
+                SDL_RenderCopy(renderer, textMenuSelect_texture, NULL, &textMenuSelect_dest);
+                // Set difficult level (speed)
+                snake.speed = 100;
+            }
+            if (selectedSettingsMenu_difficulty == 2) {
+                 // Button Hard text
+                SDL_Surface * textMenuSelect_surface = TTF_RenderText_Blended(fontMenu, "Difficile", color);
+                SDL_Texture * textMenuSelect_texture = SDL_CreateTextureFromSurface(renderer,textMenuSelect_surface);
+                SDL_QueryTexture(textMenuSelect_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuSelect_dest = { 255, 309, texW, texH};
+                SDL_RenderCopy(renderer, textMenuSelect_texture, NULL, &textMenuSelect_dest);
+                // Set difficult level (speed)
+                snake.speed = 75;
+            }
+
+            if(selectedSettingsMenu_commands == 0) {
+                 // Button Arrow keyboard text
+                SDL_Surface * textMenuSelect_surface = TTF_RenderText_Blended(fontMenu, "Flèches (Clavier)", color);
+                SDL_Texture * textMenuSelect_texture = SDL_CreateTextureFromSurface(renderer,textMenuSelect_surface);
+                SDL_QueryTexture(textMenuSelect_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuSelect_dest = { 200, 393, texW, texH};
+                SDL_RenderCopy(renderer, textMenuSelect_texture, NULL, &textMenuSelect_dest);
+                //Set commands mode (Arrow)
+                gameCommands = 0;
+            }
+            if (selectedSettingsMenu_commands == 1) {
+                 // Button ZQSD keyboard text
+                SDL_Surface * textMenuSelect_surface = TTF_RenderText_Blended(fontMenu, "ZQSD (Clavier)", color);
+                SDL_Texture * textMenuSelect_texture = SDL_CreateTextureFromSurface(renderer,textMenuSelect_surface);
+                SDL_QueryTexture(textMenuSelect_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuSelect_dest = { 210, 393, texW, texH};
+                SDL_RenderCopy(renderer, textMenuSelect_texture, NULL, &textMenuSelect_dest);
+                //Set commands mode (ZQSD)
+                gameCommands = 1;
+            }
+
+            // Button back text
+            SDL_Surface * textMenuQuit_surface = TTF_RenderText_Blended(fontMenu, "Retour", color);
+            SDL_Texture * textMenuQuit_texture = SDL_CreateTextureFromSurface(renderer,textMenuQuit_surface);
+            SDL_QueryTexture(textMenuQuit_texture, NULL, NULL, &texW, &texH);
+            SDL_Rect textMenuQuit_dest = { 255, 477, texW, texH};
+            SDL_RenderCopy(renderer, textMenuQuit_texture, NULL, &textMenuQuit_dest);
+
+            // Left/Right arrows textures
+            SDL_RenderCopy(renderer, arrowLeft, NULL, &arrowMenuLeft1_dst);
+            SDL_RenderCopy(renderer, arrowRight, NULL, &arrowMenuRight1_dst);
+            SDL_RenderCopy(renderer, arrowLeft, NULL, &arrowMenuLeft2_dst);
+            SDL_RenderCopy(renderer, arrowRight, NULL, &arrowMenuRight2_dst);
+
+            SDL_RenderPresent(renderer);
+
+        }
+
+
 	}
 
     // Clearing renderer from main menu
@@ -546,63 +820,108 @@ int main(int argc, char **argv) {
                 switch(event.key.keysym.sym)
                 {
                     case SDLK_ESCAPE: SDL_Quit(); return 0; break;
+                    // Arrows command mode
                     case SDLK_UP:
-                        if(snake.direction.current != 4 && snake.direction.current != 1) {
-                            snake.direction.current = 1;
-                            snake.rotation.x = snake.position.x;
-                            snake.rotation.y = snake.position.y;
-                            std::cout << "X = " << snake.rotation.x << " Y= " << snake.rotation.y << std::endl;
-                            snake_head_clip = {90, 0, 30, 30};
-                            snake_body_clip ={60, 30, 30, 30};
-                            snake_tail_clip ={0, 60, 30, 30};
-                            break;
+                        if(gameCommands == 0) {
+                            if(snake.direction.current != 4 && snake.direction.current != 1) {
+                                snake.direction.current = 1;
+                                snake.rotation.x = snake.position.x;
+                                snake.rotation.y = snake.position.y;
+                                snake_head_clip = {90, 0, 30, 30};
+                                snake_body_clip ={60, 30, 30, 30};
+                                snake_tail_clip ={0, 60, 30, 30};
+                            }
                         }
-                        else {
-                            break;
-                        }
-
+                        break;
                     case SDLK_LEFT:
-                        if(snake.direction.current != 3 && snake.direction.current != 2) {
-                            snake.direction.current = 2;
-                            snake.rotation.x = snake.position.x;
-                            snake.rotation.y = snake.position.y;
-                            std::cout << "X = " << snake.rotation.x << " Y= " << snake.rotation.y << std::endl;
-                            snake_head_clip = {90, 90, 30, 30};
-                            snake_body_clip ={60, 0, 30, 30};
-                            snake_tail_clip ={60, 60, 30, 30};
-                            break;
+                        if(gameCommands == 0) {
+                            if(snake.direction.current != 3 && snake.direction.current != 2) {
+                                snake.direction.current = 2;
+                                snake.rotation.x = snake.position.x;
+                                snake.rotation.y = snake.position.y;
+                                snake_head_clip = {90, 90, 30, 30};
+                                snake_body_clip ={60, 0, 30, 30};
+                                snake_tail_clip ={60, 60, 30, 30};
+                            }
                         }
-                        else {
-                            break;
-                        }
+                        break;
                     case SDLK_RIGHT:
-                         if(snake.direction.current != 2 && snake.direction.current != 3) {
-                            snake.direction.current = 3;
-                            snake.rotation.x = snake.position.x;
-                            snake.rotation.y = snake.position.y;
-                            std::cout << "X = " << snake.rotation.x << " Y= " << snake.rotation.y << std::endl;
-                            snake_head_clip = {90, 30, 30, 30};
-                            snake_body_clip ={60, 0, 30, 30};
-                            snake_tail_clip ={0, 90, 30, 30};
-                            break;
+                         if(gameCommands == 0) {
+                             if(snake.direction.current != 2 && snake.direction.current != 3) {
+                                snake.direction.current = 3;
+                                snake.rotation.x = snake.position.x;
+                                snake.rotation.y = snake.position.y;
+                                snake_head_clip = {90, 30, 30, 30};
+                                snake_body_clip ={60, 0, 30, 30};
+                                snake_tail_clip ={0, 90, 30, 30};
+                                break;
+                            }
                         }
-                        else {
-                            break;
-                        }
+                        break;
                     case SDLK_DOWN:
-                          if(snake.direction.current != 1 && snake.direction.current != 4) {
-                            snake.direction.current = 4;
-                            snake.rotation.x = snake.position.x;
-                            snake.rotation.y = snake.position.y;
-                            std::cout << "X = " << snake.rotation.x << " Y= " << snake.rotation.y << std::endl;
-                            snake_head_clip = {90, 60, 30, 30};
-                            snake_body_clip ={60, 30, 30, 30};
-                            snake_tail_clip ={30, 60, 30, 30};
-                            break;
+                          if(gameCommands == 0) {
+                              if(snake.direction.current != 1 && snake.direction.current != 4) {
+                                snake.direction.current = 4;
+                                snake.rotation.x = snake.position.x;
+                                snake.rotation.y = snake.position.y;
+                                snake_head_clip = {90, 60, 30, 30};
+                                snake_body_clip ={60, 30, 30, 30};
+                                snake_tail_clip ={30, 60, 30, 30};
+                                break;
+                            }
                         }
-                        else {
-                            break;
+                        break;
+                    // ZQSD command mode
+                    case SDLK_z:
+                        if(gameCommands == 1) {
+                            if(snake.direction.current != 4 && snake.direction.current != 1) {
+                                snake.direction.current = 1;
+                                snake.rotation.x = snake.position.x;
+                                snake.rotation.y = snake.position.y;
+                                snake_head_clip = {90, 0, 30, 30};
+                                snake_body_clip ={60, 30, 30, 30};
+                                snake_tail_clip ={0, 60, 30, 30};
+                            }
                         }
+                        break;
+                    case SDLK_q:
+                        if(gameCommands == 1) {
+                            if(snake.direction.current != 3 && snake.direction.current != 2) {
+                                snake.direction.current = 2;
+                                snake.rotation.x = snake.position.x;
+                                snake.rotation.y = snake.position.y;
+                                snake_head_clip = {90, 90, 30, 30};
+                                snake_body_clip ={60, 0, 30, 30};
+                                snake_tail_clip ={60, 60, 30, 30};
+                            }
+                        }
+                        break;
+                    case SDLK_d:
+                         if(gameCommands == 1) {
+                             if(snake.direction.current != 2 && snake.direction.current != 3) {
+                                snake.direction.current = 3;
+                                snake.rotation.x = snake.position.x;
+                                snake.rotation.y = snake.position.y;
+                                snake_head_clip = {90, 30, 30, 30};
+                                snake_body_clip ={60, 0, 30, 30};
+                                snake_tail_clip ={0, 90, 30, 30};
+                                break;
+                            }
+                        }
+                        break;
+                    case SDLK_s:
+                           if(gameCommands == 1) {
+                              if(snake.direction.current != 1 && snake.direction.current != 4) {
+                                snake.direction.current = 4;
+                                snake.rotation.x = snake.position.x;
+                                snake.rotation.y = snake.position.y;
+                                snake_head_clip = {90, 60, 30, 30};
+                                snake_body_clip ={60, 30, 30, 30};
+                                snake_tail_clip ={30, 60, 30, 30};
+                                break;
+                            }
+                        }
+                        break;
                 }
                 break;
             }
@@ -638,7 +957,7 @@ int main(int argc, char **argv) {
 
         SDL_RenderPresent(renderer);
 
-        SDL_Delay(110);
+        SDL_Delay(snake.speed);
 
         // In Game Mode = 1 (Normal) when you reach the score specified the game jump to the next level.
         if ((gameMode == 1) && (snake.score == 500) && (SelectedLevel < 6)) {
@@ -656,7 +975,7 @@ int main(int argc, char **argv) {
             SDL_RenderCopy(renderer, background, NULL, NULL);
             // 1st fruit drawing
             DrawFruits(&apple,apple_texture,table2D,map_width,map_height,tile_width,tile_height,renderer,&snake,tailX,tailY);
-            SDL_Delay(110);
+            SDL_Delay(snake.speed);
         }
 
         ////////////////////////////////
@@ -709,16 +1028,44 @@ int main(int argc, char **argv) {
                 {
                     case SDLK_ESCAPE: SDL_Quit(); return 0; break;
                     case SDLK_UP :
-                        if(selectedGameOverMenu == 1) {
-                           selectedGameOverMenu--;
+                        if(gameCommands == 0) {
+                            if(selectedGameOverMenu == 1) {
+                               selectedGameOverMenu--;
+                            }
+                            else {
+                                    selectedGameOverMenu=1;
+                            }
                         }
-                        else {selectedGameOverMenu=1;}
                         break;
                     case SDLK_DOWN :
-                        if(selectedGameOverMenu == 0) {
-                            selectedGameOverMenu++;
+                        if(gameCommands == 0) {
+                            if(selectedGameOverMenu == 0) {
+                                selectedGameOverMenu++;
+                            }
+                            else {
+                                    selectedGameOverMenu=0;
+                            }
                         }
-                        else {selectedGameOverMenu=0;}
+                        break;
+                     case SDLK_z :
+                        if(gameCommands == 1) {
+                            if(selectedGameOverMenu == 1) {
+                               selectedGameOverMenu--;
+                            }
+                            else {
+                                    selectedGameOverMenu=1;
+                            }
+                        }
+                        break;
+                    case SDLK_s :
+                        if(gameCommands == 1) {
+                            if(selectedGameOverMenu == 0) {
+                                selectedGameOverMenu++;
+                            }
+                            else {
+                                    selectedGameOverMenu=0;
+                            }
+                        }
                         break;
                     case SDLK_RETURN :
                         if(selectedGameOverMenu == 0) {

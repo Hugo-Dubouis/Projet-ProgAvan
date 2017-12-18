@@ -68,9 +68,7 @@ void DrawFruits (struct Apple* apple, SDL_Texture* apple_texture,float** table, 
 	Rect_dest.h = tile_height;
 	apple->position.x = randWidth;
 	apple->position.y = randHeight;
-	std::cout<< randWidth << std::endl;
-	std::cout<< randHeight << std::endl;
-	std::cout<< table[randWidth][randHeight] << std::endl;
+	std::cout << table[randWidth][randHeight] << std::endl;
 
     bool validCoords = false;
     // We check if random coordinates are not in a wall or the snake's head

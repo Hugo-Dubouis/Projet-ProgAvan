@@ -28,6 +28,7 @@ struct Snake {
     // 4 : DOWN
     int length; // Length of the snake (without head and tail)
     int score;
+    int speed;
 };
 
 void DrawSnake (struct Snake* snake,SDL_Texture* bg,const SDL_Rect snake_head_clip,const SDL_Rect snake_body_clip,const SDL_Rect snake_tail_clip, SDL_Texture* snake_texture, SDL_Renderer* sdlRenderer, int* tailX, int* tailY,int prevX,int prevY,int prev2X,int prev2Y);
