@@ -18,6 +18,7 @@ Projet du cours de programmation avancée de Damien Thouvenot et Hugo Dubouis é
 
 ## TO-DO-LIST
 
+- Ajout d'un écran de félicitations a la fin du mode de jeu normal.
 - Amélioration de la fonction DrawFruits() : calculs des coordonées aléatoires au lancement du jeu et non pendant la partie pour ne pas figer le jeu lors des calculs.
 - Sauvegarde dans un fichier des options et des meilleurs scores.
 - Support de la manette.
