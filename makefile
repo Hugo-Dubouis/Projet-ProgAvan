@@ -11,14 +11,20 @@ COMPILER_FLAGS = -w
 #LINKER_FLAGS specifies the libraries we're linking against
 # Windows
 ifeq ($(OS),Windows_NT)
-	LINKER_FLAGS = -lmingw32 -lSDL2 -lSDL2main -lmingw32 -lSDL2main -lSDL2
+	LINKER_FLAGS = -lmingw32 -lSDL2 -lSDL2main -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -static-libgcc -static-libstdc++
 # Linux
 else
 	LINKER_FLAGS = -lSDL2 
 endif
 
 #OBJ_NAME specifies the name of our exectuable
-OBJ_NAME = snake.exe
+# Windows
+ifeq ($(OS),Windows_NT)
+	OBJ_NAME = snake.exe
+# Linux
+else
+	OBJ_NAME = snake
+endif
 
 #This is the target that compiles our executable
 all : $(OBJS)
