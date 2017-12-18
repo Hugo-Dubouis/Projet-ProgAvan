@@ -6,7 +6,7 @@
 
 ///////////////////////////////////////////////////////
 // Function loading Map
-////
+///////////////////////////////////////////////////////
 void LoadMap(int SelectedLevel,float** table2D,int dim_allocated,int map_width,int map_height)
 {
 
@@ -33,7 +33,7 @@ void LoadMap(int SelectedLevel,float** table2D,int dim_allocated,int map_width,i
 
 ///////////////////////////////////////////////////////
 // Map drawing function
-////
+///////////////////////////////////////////////////////
 void DrawMap(SDL_Surface* screen, SDL_Texture* wall, float** table, int map_width, int map_height, int tile_width, int tile_height, SDL_Renderer * sdlRenderer)
 {
 	int i, j;
@@ -55,6 +55,7 @@ void DrawMap(SDL_Surface* screen, SDL_Texture* wall, float** table, int map_widt
 
 ///////////////////////////////////////////////////////
 // Fruit drawing function
+///////////////////////////////////////////////////////
 void DrawFruits (struct Apple* apple, SDL_Texture* apple_texture,float** table, int map_width, int map_height, int tile_width, int tile_height, SDL_Renderer * sdlRenderer, struct Snake* snake, int* tailX, int* tailY)
 {
     int randHeight, randWidth;
@@ -93,6 +94,7 @@ void DrawFruits (struct Apple* apple, SDL_Texture* apple_texture,float** table, 
 
 ///////////////////////////////////////////////////////
 // Collision detection function
+///////////////////////////////////////////////////////
 void Collision (struct Apple* apple, struct Snake* snake,SDL_Texture* apple_texture,float** table, int map_width, int map_height, int tile_width, int tile_height, SDL_Renderer * sdlRenderer, bool* gameOver,int* tailX, int* tailY) {
     // Regenerate Apple if snake position equals apple position
     if  ((snake->position.x == apple->position.x) && (snake->position.y == apple->position.y)) {
@@ -112,5 +114,3 @@ void Collision (struct Apple* apple, struct Snake* snake,SDL_Texture* apple_text
         *gameOver = true;
     }
 }
-
-

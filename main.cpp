@@ -32,8 +32,7 @@ int main(int argc, char **argv) {
 	snake.score = 0;
 
  	// Snake head sprite clip
-	SDL_Rect snake_head_clip;
-    snake_head_clip ={90, 30, 30, 30};
+	SDL_Rect snake_head_clip ={90, 30, 30, 30};
 
     // Snake body sprite clip
     SDL_Rect snake_body_clip;
@@ -46,13 +45,14 @@ int main(int argc, char **argv) {
     // Apple
     Apple apple;
 
-    // MainMenu
+    // Menu booleans
     bool mainMenu = false;
+    bool mainMenu_SelectLevel = false;
 
-    // gameRunning
+    // gameRunning boolean
     bool gameRunning = false;
 
-    // GameOver
+    // gameOver boolean
     bool gameOver = false;
 
     // Game Mode
@@ -108,13 +108,26 @@ int main(int argc, char **argv) {
 	SDL_Surface* screenMenu = SDL_LoadBMP("textures/menu_bg.bmp");
 	if (!screenMenu) { printf("Loading failed : menu_bg.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
 
+	SDL_Surface* screenMenuSelectLevel = SDL_LoadBMP("textures/menu_SelectLevel_bg.bmp");
+	if (!screenMenuSelectLevel) { printf("Loading failed : menu_SelectLevel_bg.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
 	SDL_Surface* buttonMenu = SDL_LoadBMP("textures/buttonMenu.bmp");
 	if (!buttonMenu) { printf("Loading failed : buttonMenu.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
 
 	SDL_Surface* buttonMenu_selected = SDL_LoadBMP("textures/buttonMenu_selected.bmp");
 	if (!buttonMenu_selected) { printf("Loading failed : buttonMenu_selected.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
 
-	//GameOver Menu
+	SDL_Surface* arrowMenuUp_surface = SDL_LoadBMP("textures/arrowUp.bmp");
+	if (!arrowMenuUp_surface) { printf("Loading failed : arrowUp.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_SetColorKey(arrowMenuUp_surface,SDL_TRUE,SDL_MapRGB(arrowMenuUp_surface->format, 238, 0, 255));
+
+	SDL_Surface* arrowMenuDown_surface = SDL_LoadBMP("textures/arrowDown.bmp");
+	if (!arrowMenuDown_surface) { printf("Loading failed : arrowDown.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
+
+	SDL_SetColorKey(arrowMenuDown_surface,SDL_TRUE,SDL_MapRGB(arrowMenuDown_surface->format, 238, 0, 255));
+
+	// GameOver Menu
     SDL_Surface* screenGameOver = SDL_LoadBMP("textures/bg_gameOver.bmp");
 	if (!screenGameOver) { printf("Loading failed : bg_gameOver.bmp\n"); SDL_Quit(); system("pause"); exit(-1); }
 
@@ -128,8 +141,11 @@ int main(int argc, char **argv) {
     SDL_Texture * scoreTexture = NULL;
     // Menu
     SDL_Texture * menu_bg = SDL_CreateTextureFromSurface(renderer, screenMenu);
+    SDL_Texture * menu_SelectLevel_bg = SDL_CreateTextureFromSurface(renderer, screenMenuSelectLevel);
     SDL_Texture * menuButton = SDL_CreateTextureFromSurface(renderer, buttonMenu);
     SDL_Texture * menuButton_selected = SDL_CreateTextureFromSurface(renderer, buttonMenu_selected);
+    SDL_Texture * arrowUp = SDL_CreateTextureFromSurface(renderer, arrowMenuUp_surface);
+    SDL_Texture * arrowDown = SDL_CreateTextureFromSurface(renderer, arrowMenuDown_surface);
 
     // Game Over Menu
     SDL_Texture * gameOver_bg = SDL_CreateTextureFromSurface(renderer, screenGameOver);
@@ -140,15 +156,13 @@ int main(int argc, char **argv) {
     SDL_FreeSurface(player);
     SDL_FreeSurface(apple_surface);
     SDL_FreeSurface(score_bg_surface);
-
-	/* Liberating memory used for textures
-    SDL_DestroyTexture(texture_wall);
-    SDL_DestroyTexture(background);
-    SDL_DestroyTexture(snake_texture);
-    SDL_DestroyTexture(apple_texture);
-    SDL_DestroyTexture(score_bg);
-    SDL_DestroyTexture(scoreTexture);
-    */
+    SDL_FreeSurface(screenMenu);
+    SDL_FreeSurface(screenMenuSelectLevel);
+    SDL_FreeSurface(buttonMenu);
+    SDL_FreeSurface(buttonMenu_selected);
+    SDL_FreeSurface(screenGameOver);
+    SDL_FreeSurface(arrowMenuUp_surface);
+    SDL_FreeSurface(arrowMenuDown_surface);
 
 	// Setting the score background
 	SDL_Rect score_src = { 0, 0, 600, 30};
@@ -166,14 +180,20 @@ int main(int argc, char **argv) {
 
     ////////////////////////////////
     // Main menu
+
+    // Variables for menu and level selection
     int selectedMenu = 0;
+    int selectedLevelMenu = 0;
     int selectedGameOverMenu = 0;
     int SelectedLevel;
-    // Setting Button coordinates
+
+    // Button coordinates
     SDL_Rect buttonMenu1_dst = { 114, 216, 372, 56};
     SDL_Rect buttonMenu2_dst = { 114, 300, 372, 56};
     SDL_Rect buttonMenu3_dst = { 114, 384, 372, 56};
     SDL_Rect buttonMenu4_dst = { 114, 468, 372, 56};
+    SDL_Rect arrowMenuUp_dst = { 282, 240, 37, 37};
+    SDL_Rect arrowMenuDown_dst = { 282, 558, 37, 37};
 	while(!mainMenu) {
 
         // Main menu background
@@ -205,7 +225,7 @@ int main(int argc, char **argv) {
                             gameMode = 1;
                         }
                         else if (selectedMenu == 1) {
-                            std::cout << "Work in progress !" << std::endl;
+                            mainMenu_SelectLevel = true;
                         }
                         else if (selectedMenu == 2) {
                             std::cout << "Work in progress !" << std::endl;
@@ -221,7 +241,7 @@ int main(int argc, char **argv) {
                             gameMode = 1;
                         }
                         else if (selectedMenu == 1) {
-                            std::cout << "Work in progress !" << std::endl;
+                            mainMenu_SelectLevel = true;
                         }
                         else if (selectedMenu == 2) {
                             std::cout << "Work in progress !" << std::endl;
@@ -256,28 +276,28 @@ int main(int argc, char **argv) {
         }
         else {}
 
-        // Button Play
+        // Button Play text
         SDL_Surface * textMenuPlay_surface = TTF_RenderText_Blended(fontMenu, "Jouer", color);
         SDL_Texture * textMenuPlay_texture = SDL_CreateTextureFromSurface(renderer,textMenuPlay_surface);
         SDL_QueryTexture(textMenuPlay_texture, NULL, NULL, &texW, &texH);
         SDL_Rect textMenuPlay_dest = { 265, 225, texW, texH};
         SDL_RenderCopy(renderer, textMenuPlay_texture, NULL, &textMenuPlay_dest);
 
-        // Button SelectLevel
+        // Button SelectLevel text
         SDL_Surface * textMenuSelect_surface = TTF_RenderText_Blended(fontMenu, "Choisir un niveau", color);
         SDL_Texture * textMenuSelect_texture = SDL_CreateTextureFromSurface(renderer,textMenuSelect_surface);
         SDL_QueryTexture(textMenuSelect_texture, NULL, NULL, &texW, &texH);
         SDL_Rect textMenuSelect_dest = { 195, 309, texW, texH};
         SDL_RenderCopy(renderer, textMenuSelect_texture, NULL, &textMenuSelect_dest);
 
-        // Button Settings
+        // Button Settings text
         SDL_Surface * textMenuSettings_surface = TTF_RenderText_Blended(fontMenu, "Options", color);
         SDL_Texture * textMenuSettings_texture = SDL_CreateTextureFromSurface(renderer,textMenuSettings_surface);
         SDL_QueryTexture(textMenuSettings_texture, NULL, NULL, &texW, &texH);
         SDL_Rect textMenuSettings_dest = { 250, 393, texW, texH};
         SDL_RenderCopy(renderer, textMenuSettings_texture, NULL, &textMenuSettings_dest);
 
-        // Button Quit
+        // Button Quit text
         SDL_Surface * textMenuQuit_surface = TTF_RenderText_Blended(fontMenu, "Quitter", color);
         SDL_Texture * textMenuQuit_texture = SDL_CreateTextureFromSurface(renderer,textMenuQuit_surface);
         SDL_QueryTexture(textMenuQuit_texture, NULL, NULL, &texW, &texH);
@@ -287,7 +307,197 @@ int main(int argc, char **argv) {
         SDL_RenderPresent(renderer);
 
 
+        ////////////////////////////////
+        // Level selecting loop
+        while(mainMenu_SelectLevel) {
+            // Clearing renderer from main menu
+            SDL_RenderClear(renderer);
 
+            // Main menu background
+            SDL_RenderCopy(renderer, menu_SelectLevel_bg, NULL, NULL);
+
+            SDL_WaitEvent(&event);
+            switch(event.type)
+            {
+            case SDL_KEYDOWN:
+                switch(event.key.keysym.sym)
+                {
+                    case SDLK_ESCAPE: SDL_Quit(); return 0; break;
+                    case SDLK_UP :
+                        if(selectedLevelMenu>0) {
+                           selectedLevelMenu--;
+                        }
+                        else {selectedLevelMenu=5;}
+                        break;
+                    case SDLK_DOWN :
+                        if(selectedLevelMenu < 5) {
+                            selectedLevelMenu++;
+                        }
+                        else {selectedLevelMenu=0;}
+                        break;
+                    case SDLK_RETURN :
+                        if(selectedLevelMenu == 0) {
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 1;
+                            gameMode = 2;
+                        }
+                        else if (selectedLevelMenu == 1) {
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 2;
+                            gameMode = 2;
+
+                        }
+                        else if (selectedLevelMenu == 2) {
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 3;
+                            gameMode = 2;
+                        }
+                        else if (selectedLevelMenu == 3){
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 4;
+                            gameMode = 2;
+                        }
+                        else if (selectedLevelMenu == 4){
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 5;
+                            gameMode = 2;
+                        }
+                        else if (selectedLevelMenu == 5){
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 6;
+                            gameMode = 2;
+                        }
+                        else {}
+                     case SDLK_KP_ENTER :
+                        if(selectedLevelMenu == 0) {
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 1;
+                            gameMode = 2;
+                        }
+                        else if (selectedLevelMenu == 1) {
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 2;
+                            gameMode = 2;
+
+                        }
+                        else if (selectedLevelMenu == 2) {
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 3;
+                            gameMode = 2;
+                        }
+                        else if (selectedLevelMenu == 3){
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 4;
+                            gameMode = 2;
+                        }
+                        else if (selectedLevelMenu == 4){
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 5;
+                            gameMode = 2;
+                        }
+                        else if (selectedLevelMenu == 5){
+                            mainMenu = true;
+                            mainMenu_SelectLevel = false;
+                            SelectedLevel = 6;
+                            gameMode = 2;
+                        }
+                        else {}
+
+                }
+            }
+
+             // Button background
+            SDL_RenderCopy(renderer, menuButton, NULL, &buttonMenu2_dst);
+            SDL_RenderCopy(renderer, menuButton, NULL, &buttonMenu3_dst);
+            SDL_RenderCopy(renderer, menuButton, NULL, &buttonMenu4_dst);
+
+            if(selectedLevelMenu < 3) {
+                if(selectedLevelMenu == 0) {
+                        SDL_RenderCopy(renderer, menuButton_selected, NULL, &buttonMenu2_dst);
+                }
+                else if (selectedLevelMenu == 1) {
+                        SDL_RenderCopy(renderer, menuButton_selected, NULL, &buttonMenu3_dst);
+                }
+                else if (selectedLevelMenu == 2) {
+                        SDL_RenderCopy(renderer, menuButton_selected, NULL, &buttonMenu4_dst);
+                }
+                else {}
+
+                // Arrow Down
+                SDL_RenderCopy(renderer, arrowDown, NULL, &arrowMenuDown_dst);
+
+                // Button Level 1 text
+                SDL_Surface * textMenuSelect_surface = TTF_RenderText_Blended(fontMenu, "Niveau 1", color);
+                SDL_Texture * textMenuSelect_texture = SDL_CreateTextureFromSurface(renderer,textMenuSelect_surface);
+                SDL_QueryTexture(textMenuSelect_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuSelect_dest = { 245, 309, texW, texH};
+                SDL_RenderCopy(renderer, textMenuSelect_texture, NULL, &textMenuSelect_dest);
+
+                // Button Level 2 text
+                SDL_Surface * textMenuSettings_surface = TTF_RenderText_Blended(fontMenu, "Niveau 2", color);
+                SDL_Texture * textMenuSettings_texture = SDL_CreateTextureFromSurface(renderer,textMenuSettings_surface);
+                SDL_QueryTexture(textMenuSettings_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuSettings_dest = { 245, 393, texW, texH};
+                SDL_RenderCopy(renderer, textMenuSettings_texture, NULL, &textMenuSettings_dest);
+
+                // Button Level 3 text
+                SDL_Surface * textMenuQuit_surface = TTF_RenderText_Blended(fontMenu, "Niveau 3", color);
+                SDL_Texture * textMenuQuit_texture = SDL_CreateTextureFromSurface(renderer,textMenuQuit_surface);
+                SDL_QueryTexture(textMenuQuit_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuQuit_dest = { 245, 477, texW, texH};
+                SDL_RenderCopy(renderer, textMenuQuit_texture, NULL, &textMenuQuit_dest);
+            }
+            else {
+                if(selectedLevelMenu == 3) {
+                        SDL_RenderCopy(renderer, menuButton_selected, NULL, &buttonMenu2_dst);
+                }
+                else if (selectedLevelMenu == 4) {
+                        SDL_RenderCopy(renderer, menuButton_selected, NULL, &buttonMenu3_dst);
+                }
+                else if (selectedLevelMenu == 5) {
+                        SDL_RenderCopy(renderer, menuButton_selected, NULL, &buttonMenu4_dst);
+                }
+                else {}
+
+                // Arrow Up
+                SDL_RenderCopy(renderer, arrowUp, NULL, &arrowMenuUp_dst);
+
+                // Button Level 4 text
+                SDL_Surface * textMenuSelect_surface = TTF_RenderText_Blended(fontMenu, "Niveau 4", color);
+                SDL_Texture * textMenuSelect_texture = SDL_CreateTextureFromSurface(renderer,textMenuSelect_surface);
+                SDL_QueryTexture(textMenuSelect_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuSelect_dest = { 245, 309, texW, texH};
+                SDL_RenderCopy(renderer, textMenuSelect_texture, NULL, &textMenuSelect_dest);
+
+                // Button Level 5 text
+                SDL_Surface * textMenuSettings_surface = TTF_RenderText_Blended(fontMenu, "Niveau 5", color);
+                SDL_Texture * textMenuSettings_texture = SDL_CreateTextureFromSurface(renderer,textMenuSettings_surface);
+                SDL_QueryTexture(textMenuSettings_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuSettings_dest = { 245, 393, texW, texH};
+                SDL_RenderCopy(renderer, textMenuSettings_texture, NULL, &textMenuSettings_dest);
+
+                // Button Level 6 text
+                SDL_Surface * textMenuQuit_surface = TTF_RenderText_Blended(fontMenu, "Niveau 6", color);
+                SDL_Texture * textMenuQuit_texture = SDL_CreateTextureFromSurface(renderer,textMenuQuit_surface);
+                SDL_QueryTexture(textMenuQuit_texture, NULL, NULL, &texW, &texH);
+                SDL_Rect textMenuQuit_dest = { 245, 477, texW, texH};
+                SDL_RenderCopy(renderer, textMenuQuit_texture, NULL, &textMenuQuit_dest);
+            }
+
+            SDL_RenderPresent(renderer);
+
+        }
 	}
 
     // Clearing renderer from main menu
@@ -318,7 +528,7 @@ int main(int argc, char **argv) {
         tailX[0] = snake.position.x;
         tailY[0] = snake.position.y;
 
-        // Snake
+        // Snake body variables
         int prevX = tailX[0];
         int prevY = tailY[0];
         int prev2X, prev2Y;
@@ -431,12 +641,13 @@ int main(int argc, char **argv) {
         SDL_Delay(110);
 
         // In Game Mode = 1 (Normal) when you reach the score specified the game jump to the next level.
-        if ((gameMode = 1) && (snake.score == 500) && (SelectedLevel < 6)) {
+        if ((gameMode == 1) && (snake.score == 500) && (SelectedLevel < 6)) {
             SelectedLevel = SelectedLevel+1;
             snake.position.x = 5;
             snake.position.y = 5;
             snake.direction.current = 0;
             snake.length = 2;
+            snake_head_clip ={90, 30, 30, 30};
             // Clearing renderer from GzmeOver screen
             SDL_RenderClear(renderer);
             // Map loading
@@ -512,11 +723,14 @@ int main(int argc, char **argv) {
                     case SDLK_RETURN :
                         if(selectedGameOverMenu == 0) {
                             gameOver = false;
-                            SelectedLevel = 1;
+                            if(gameMode == 1) {
+                                SelectedLevel = 1;
+                            }
                             snake.position.x = 5;
                             snake.position.y = 5;
                             snake.direction.current = 0;
                             snake.length = 2;
+                            snake_head_clip ={90, 30, 30, 30};
                             // Clearing renderer from GzmeOver screen
                             SDL_RenderClear(renderer);
                             // Map loading
@@ -536,11 +750,14 @@ int main(int argc, char **argv) {
                      case SDLK_KP_ENTER :
                          if(selectedGameOverMenu == 0) {
                             gameOver = false;
-                            SelectedLevel = 1;
+                            if(gameMode == 1) {
+                                SelectedLevel = 1;
+                            }
                             snake.position.x = 5;
                             snake.position.y = 5;
                             snake.direction.current = 0;
                             snake.length = 2;
+                            snake_head_clip ={90, 30, 30, 30};
                             // Clearing renderer from GzmeOver screen
                             SDL_RenderClear(renderer);
                             // Map loading
