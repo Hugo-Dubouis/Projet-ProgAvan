@@ -4,9 +4,13 @@
 
 # Projet-ProgAvan
 Projet du cours de programmation avancée/ binôme: Damien Thouvenot  et Hugo Dubouis
-
-<p align="center">
+<br />
+<p align="center" font-size="20x" >
+<a href="https://github.com/Hugo-Dubouis/Projet-ProgAvan/releases"> Télécharger le jeu (Windows/Linux)</a></h3>
+  <br />
+  <br />
   <img src="https://i.imgur.com/xdhpwuT.png">
+  <img src="https://i.imgur.com/6X4TFCw.png">
   <img src="https://i.imgur.com/eMf3cV0.png">
   <img src="https://i.imgur.com/LRg2Xkb.png">
 </p>
