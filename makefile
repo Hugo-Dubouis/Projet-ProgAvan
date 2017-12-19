@@ -14,7 +14,7 @@ ifeq ($(OS),Windows_NT)
 	LINKER_FLAGS = -lmingw32 -lSDL2 -lSDL2main -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -static-libgcc -static-libstdc++
 # Linux
 else
-	LINKER_FLAGS = -lSDL2 
+	LINKER_FLAGS = -lSDL2 -lSDL_ttf
 endif
 
 #OBJ_NAME specifies the name of our exectuable
